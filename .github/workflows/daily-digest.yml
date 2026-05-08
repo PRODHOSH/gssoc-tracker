@@ -1,0 +1,44 @@
+name: Daily Digest Email
+
+on:
+  schedule:
+    - cron: '30 2 * * *'    # 8:00 AM IST (UTC+5:30) = 02:30 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run sync + daily digest
+        env:
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
+        run: npx tsx scripts/sync.ts --daily
+
+      - name: Commit data changes
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add data/
+          git diff --quiet && git diff --staged --quiet || (
+            git commit -m "chore(data): daily digest sync $(date -u +'%Y-%m-%d')"
+            git push
+          )

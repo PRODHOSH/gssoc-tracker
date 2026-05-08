@@ -1,26 +1,66 @@
 @import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-canvas:       #ffffff;
+  --color-canvas-soft:  #fafafa;
+  --color-canvas-night: #1c1c1c;
+  --color-primary:      #3ecf8e;
+  --color-primary-deep: #24b47e;
+  --color-ink:          #171717;
+  --color-ink-mute:     #707070;
+  --color-hairline:     #dfdfdf;
+  --color-background:   #fafafa;
+  --color-foreground:   #171717;
+  --color-border:       #dfdfdf;
+  --color-ring:         #3ecf8e;
+  --radius:             8px;
+  --font-sans: var(--font-geist-sans), "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body {
+    background-color: #fafafa;
+    color: #171717;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #dfdfdf; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #c7c7c7; }
+
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(23,23,23,0.5);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
 }
+
+@keyframes modal-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.modal-panel {
+  background: #fff;
+  border: 1px solid #dfdfdf;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(23,23,23,0.14);
+  width: 100%; max-width: 520px; max-height: 90vh;
+  overflow-y: auto;
+  animation: modal-in 0.18s ease forwards;
+}
+
+@keyframes shimmer {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.45; }
+}
+.skeleton { animation: shimmer 1.4s ease-in-out infinite; }
