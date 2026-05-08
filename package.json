@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "sync": "tsx scripts/sync.ts",
+    "sync:daily": "tsx scripts/sync.ts --daily",
+    "test:email": "tsx scripts/test-email.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
