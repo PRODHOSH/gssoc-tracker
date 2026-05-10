@@ -9,5 +9,16 @@
     },
     "rank_change": 0,
     "score_change": 0
+  },
+  {
+    "timestamp": "2026-05-10T08:09:54.709Z",
+    "rank": 11,
+    "score": 1020,
+    "role_scores": {
+      "ambassador": 935,
+      "contributor": 110
+    },
+    "rank_change": 1,
+    "score_change": 0
   }
 ]
