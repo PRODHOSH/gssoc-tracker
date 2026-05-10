@@ -1,11 +1,8 @@
 {
-  "timestamp": "2026-05-10T08:09:54.709Z",
+  "timestamp": "2026-05-10T13:21:04.419Z",
   "rank": 11,
   "score": 1020,
-  "role_scores": {
-    "ambassador": 935,
-    "contributor": 110
-  },
+  "role_scores": {},
   "name": "Prodhosh VS",
   "github_id": "PRODHOSH",
   "avatar_url": "https://avatars.githubusercontent.com/PRODHOSH",
@@ -28,67 +25,6 @@
     "AI/ML",
     "DevOps"
   ],
-  "breakdown": [
-    {
-      "label": "ambassador (accepted)",
-      "pts": 70,
-      "role": "ambassador"
-    },
-    {
-      "label": "contributor (accepted)",
-      "pts": 50,
-      "role": "contributor"
-    },
-    {
-      "label": "GitHub profile",
-      "pts": 10,
-      "role": "general"
-    },
-    {
-      "label": "Bio filled",
-      "pts": 5,
-      "role": "general"
-    },
-    {
-      "label": "LinkedIn profile",
-      "pts": 5,
-      "role": "general"
-    },
-    {
-      "label": "Discord linked",
-      "pts": 5,
-      "role": "general"
-    },
-    {
-      "label": "Both tracks selected",
-      "pts": 35,
-      "role": "contributor"
-    },
-    {
-      "label": "Social links",
-      "pts": 20,
-      "role": "ambassador"
-    },
-    {
-      "label": "Reach plan",
-      "pts": 15,
-      "role": "ambassador"
-    },
-    {
-      "label": "Promotion plan",
-      "pts": 10,
-      "role": "ambassador"
-    },
-    {
-      "label": "Past events",
-      "pts": 15,
-      "role": "ambassador"
-    },
-    {
-      "label": "52 referral(s)",
-      "pts": 780,
-      "role": "ambassador"
-    }
-  ],
+  "breakdown": [],
   "linkedin_url": "https://www.linkedin.com/in/prodhoshvs"
 }
