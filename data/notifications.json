@@ -70,5 +70,17 @@
       "score_before": 1870,
       "score_after": 1870
     }
+  },
+  {
+    "timestamp": "2026-05-12T19:54:34.563Z",
+    "type": "change_alert",
+    "subject": "GSSoC Alert: Score +15 pts · Rank #8",
+    "email_sent": true,
+    "changes": {
+      "rank_before": 7,
+      "rank_after": 8,
+      "score_before": 1870,
+      "score_after": 1885
+    }
   }
 ]
