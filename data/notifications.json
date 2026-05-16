@@ -160,5 +160,11 @@
       "score_before": 1930,
       "score_after": 1945
     }
+  },
+  {
+    "timestamp": "2026-05-16T05:41:02.579Z",
+    "type": "daily_digest",
+    "subject": "GSSoC Daily: Score 1,945 pts · Rank #10",
+    "email_sent": true
   }
 ]
