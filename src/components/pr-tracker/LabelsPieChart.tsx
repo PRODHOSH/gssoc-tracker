@@ -1,5 +1,5 @@
 "use client";
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { ds } from "@/lib/ds";
 import type { TrackedPR } from "@/types/pr-tracker";
 
@@ -43,7 +43,7 @@ export function LabelsPieChart({ allPRs }: Props) {
         background: ds.canvas, border: `1px solid ${ds.hairlineCool}`,
         borderRadius: ds.rLg, padding: 20,
         display: "flex", alignItems: "center", justifyContent: "center",
-        minHeight: 200,
+        minHeight: 220,
       }}>
         <p style={{ color: ds.inkFaint, fontSize: 13 }}>No label data</p>
       </div>
@@ -56,28 +56,28 @@ export function LabelsPieChart({ allPRs }: Props) {
       border: `1px solid ${ds.hairlineCool}`,
       borderRadius: ds.rLg,
       padding: "18px 20px",
-      boxShadow: "0 1px 3px rgba(23,23,23,0.03)",
+      boxShadow: "0 1px 4px rgba(23,23,23,0.04)",
     }}>
-      <p style={{ margin: "0 0 14px", fontSize: 14, fontWeight: 600, color: ds.ink }}>
-        Label Distribution
-      </p>
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+        <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: ds.ink }}>Label Distribution</p>
+        <span style={{ fontSize: 11, color: ds.inkFaint }}>by frequency</span>
+      </div>
 
-      <ResponsiveContainer width="100%" height={220}>
+      {/* Pie — no Legend inside, so full height is used for the chart */}
+      <ResponsiveContainer width="100%" height={200}>
         <PieChart>
           <Pie
             data={data}
             cx="50%"
             cy="50%"
-            outerRadius={80}
-            innerRadius={42}
+            outerRadius={85}
+            innerRadius={44}
             paddingAngle={2}
             dataKey="value"
           >
             {data.map((entry) => (
-              <Cell
-                key={entry.name}
-                fill={colorMap[entry.name] ?? LABEL_GROUP_COLORS.other}
-              />
+              <Cell key={entry.name} fill={colorMap[entry.name] ?? LABEL_GROUP_COLORS.other} />
             ))}
           </Pie>
           <Tooltip
@@ -87,15 +87,35 @@ export function LabelsPieChart({ allPRs }: Props) {
               borderRadius: 8,
               fontSize: 12,
             }}
-            formatter={(v) => [`${v} PRs`, ""]}
-          />
-          <Legend
-            iconType="circle"
-            iconSize={8}
-            wrapperStyle={{ fontSize: 11, color: ds.inkMute }}
+            formatter={(v) => [`${v} PR${Number(v) !== 1 ? "s" : ""}`, ""]}
           />
         </PieChart>
       </ResponsiveContainer>
+
+      {/* Custom legend — outside the chart so spacing is controlled */}
+      <div style={{
+        display: "flex",
+        flexWrap: "wrap",
+        gap: "8px 16px",
+        marginTop: 16,
+        paddingTop: 14,
+        borderTop: `1px solid ${ds.hairlineCool}`,
+      }}>
+        {data.map((entry) => (
+          <div key={entry.name} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <span style={{
+              width: 8, height: 8, borderRadius: "50%", flexShrink: 0,
+              background: colorMap[entry.name] ?? LABEL_GROUP_COLORS.other,
+            }} />
+            <span style={{ fontSize: 11, color: ds.inkMute, whiteSpace: "nowrap" }}>
+              {entry.name}
+            </span>
+            <span style={{ fontSize: 11, color: ds.inkFaint, fontWeight: 600 }}>
+              {entry.value}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

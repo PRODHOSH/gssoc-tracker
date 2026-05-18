@@ -51,11 +51,12 @@ export function PointsTimeline({ validPRs }: Props) {
       border: `1px solid ${ds.hairlineCool}`,
       borderRadius: ds.rLg,
       padding: "18px 20px",
-      boxShadow: "0 1px 3px rgba(23,23,23,0.03)",
+      boxShadow: "0 1px 4px rgba(23,23,23,0.04)",
     }}>
-      <p style={{ margin: "0 0 14px", fontSize: 14, fontWeight: 600, color: ds.ink }}>
-        Points Over Time
-      </p>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+        <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: ds.ink }}>Points Over Time</p>
+        <span style={{ fontSize: 11, color: ds.inkFaint }}>cumulative</span>
+      </div>
 
       <ResponsiveContainer width="100%" height={200}>
         <AreaChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: -10 }}>
