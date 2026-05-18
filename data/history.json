@@ -116,5 +116,13 @@
     "role_scores": {},
     "rank_change": 1,
     "score_change": 0
+  },
+  {
+    "timestamp": "2026-05-18T06:38:41.159Z",
+    "rank": 12,
+    "score": 2690,
+    "role_scores": {},
+    "rank_change": 0,
+    "score_change": 286
   }
 ]
