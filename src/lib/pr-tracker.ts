@@ -141,32 +141,20 @@ export async function fetchGitHubUser(username: string): Promise<GitHubUser> {
   return res.json() as Promise<GitHubUser>;
 }
 
-// All GSSoC label variants we search for (covers approved, invalid, spam, etc.)
-const GSSOC_SEARCH_LABELS = [
-  "gssoc:approved",
-  "gssoc:invalid",
-  "gssoc:spam",
-  "gssoc:ai-slop",
-  // GSSoC-Ext variants used in some repos
-  "GSSoC-Ext:approved",
-  "GSSoC-Ext:invalid",
-  "GSSoC-Ext:spam",
-];
-
-async function fetchLabelPRs(
-  username: string,
-  label: string
-): Promise<RawGitHubPR[]> {
-  const q = `type:pr author:${username} label:"${label}"`;
+export async function fetchGSSoCPRs(username: string): Promise<RawGitHubPR[]> {
+  // Search only for gssoc:approved — all other labels (level, quality, type, invalid)
+  // come back in the PR response automatically, no extra API calls needed.
+  const q = `type:pr author:${username} label:"gssoc:approved"`;
   const url = `https://api.github.com/search/issues?q=${encodeURIComponent(q)}&per_page=100&sort=created&order=desc`;
   const res = await ghFetch(url);
   if (res.status === 403 || res.status === 429) throw new Error("RATE_LIMITED");
   if (res.status === 422 || res.status === 404) return [];
   if (!res.ok) throw new Error(`API_ERROR:${res.status}`);
+
   const data = await res.json() as { items: RawGitHubPR[]; total_count: number };
   const all = [...data.items];
 
-  // Paginate if more than 100 results for this label
+  // Paginate if user has more than 100 approved PRs
   if (data.total_count > 100) {
     const pages = Math.min(Math.ceil((data.total_count - 100) / 100), 9);
     const rest = await Promise.all(
@@ -180,27 +168,8 @@ async function fetchLabelPRs(
     );
     rest.forEach((items) => all.push(...items));
   }
+
   return all;
-}
-
-export async function fetchGSSoCPRs(username: string): Promise<RawGitHubPR[]> {
-  // Fetch all label variants in parallel, then deduplicate by PR id
-  const results = await Promise.all(
-    GSSOC_SEARCH_LABELS.map((label) => fetchLabelPRs(username, label))
-  );
-
-  const seen = new Set<number>();
-  const merged: RawGitHubPR[] = [];
-  for (const batch of results) {
-    for (const pr of batch) {
-      if (!seen.has(pr.id)) {
-        seen.add(pr.id);
-        merged.push(pr);
-      }
-    }
-  }
-
-  return merged;
 }
 
 function repoFromUrl(repositoryUrl: string): { name: string; url: string } {
