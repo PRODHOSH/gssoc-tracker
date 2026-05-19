@@ -6,15 +6,16 @@ import { Loader2, AlertCircle, Star, GitPullRequest } from "lucide-react";
 import { ds, fontMono } from "@/lib/ds";
 import { GitHubIcon } from "@/components/icons";
 import { SubscribeButton } from "@/components/SubscribeModal";
+import { ScoringGuide } from "@/components/pr-tracker/ScoringGuide";
 import Image from "next/image";
 
 const REPO_URL = "https://github.com/PRODHOSH/gssoc-tracker";
 
 export default function Home() {
   const router = useRouter();
-  const [username, setUsername]   = useState("");
-  const [state, setState]         = useState<"idle" | "loading" | "error">("idle");
-  const [errMsg, setErrMsg]       = useState("");
+  const [username, setUsername] = useState("");
+  const [state, setState]       = useState<"idle" | "loading" | "error">("idle");
+  const [errMsg, setErrMsg]     = useState("");
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -36,10 +37,8 @@ export default function Home() {
     <div style={{
       minHeight: "100vh",
       background: ds.canvasNight,
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
+      display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
       fontFamily: "var(--font-sans)",
       padding: "40px 24px",
     }}>
@@ -53,7 +52,7 @@ export default function Home() {
         <div style={{
           display: "inline-flex", alignItems: "center", justifyContent: "center",
           width: 52, height: 52, borderRadius: 14,
-          background: `rgba(62,207,142,0.1)`,
+          background: "rgba(62,207,142,0.1)",
           border: "1px solid rgba(62,207,142,0.2)",
           marginBottom: 24,
         }}>
@@ -62,21 +61,13 @@ export default function Home() {
 
         <h1 style={{
           margin: "0 0 8px",
-          fontSize: "clamp(28px, 5vw, 38px)",
-          fontWeight: 700,
-          color: "#fff",
-          letterSpacing: "-0.03em",
-          lineHeight: 1.1,
+          fontSize: "clamp(28px, 5vw, 38px)", fontWeight: 700,
+          color: "#fff", letterSpacing: "-0.03em", lineHeight: 1.1,
         }}>
           GSSoC PR Tracker
         </h1>
 
-        <p style={{
-          margin: "0 0 36px",
-          fontSize: 15,
-          color: "rgba(255,255,255,0.35)",
-          lineHeight: 1.6,
-        }}>
+        <p style={{ margin: "0 0 36px", fontSize: 15, color: "rgba(255,255,255,0.35)", lineHeight: 1.6 }}>
           Enter your GitHub username to see your contribution points
         </p>
 
@@ -105,10 +96,8 @@ export default function Home() {
                 borderRadius: 10,
                 border: `1.5px solid ${state === "error" ? "rgba(248,113,113,0.5)" : "rgba(255,255,255,0.08)"}`,
                 background: "rgba(255,255,255,0.04)",
-                color: "#fff",
-                fontSize: 15,
-                fontFamily: fontMono,
-                outline: "none",
+                color: "#fff", fontSize: 15,
+                fontFamily: fontMono, outline: "none",
                 transition: "border-color 0.15s",
               }}
               onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(62,207,142,0.45)")}
@@ -123,8 +112,7 @@ export default function Home() {
               height: 48, padding: "0 22px",
               borderRadius: 10, border: "none",
               background: state === "loading" ? "rgba(62,207,142,0.55)" : ds.primary,
-              color: ds.onPrimary,
-              fontSize: 14, fontWeight: 600,
+              color: ds.onPrimary, fontSize: 14, fontWeight: 600,
               cursor: state === "loading" ? "not-allowed" : "pointer",
               display: "flex", alignItems: "center", gap: 6, flexShrink: 0,
               transition: "background 0.13s",
@@ -144,6 +132,11 @@ export default function Home() {
             <AlertCircle size={13} /> {errMsg}
           </motion.div>
         )}
+
+        {/* Points System button */}
+        <div style={{ marginTop: 20, display: "flex", justifyContent: "center" }}>
+          <ScoringGuide />
+        </div>
       </motion.div>
 
       {/* Bottom bar */}
@@ -152,79 +145,48 @@ export default function Home() {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.35, duration: 0.4 }}
         style={{
-          position: "fixed",
-          bottom: 0,
-          left: 0, right: 0,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 10,
+          position: "fixed", bottom: 0, left: 0, right: 0,
+          display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
           padding: "14px 24px 18px",
           background: "linear-gradient(to top, rgba(23,23,23,0.95) 70%, transparent)",
         }}
       >
-        {/* Built by + Star + Alerts row */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
           <a
             href="https://github.com/PRODHOSH"
-            target="_blank"
-            rel="noopener noreferrer"
+            target="_blank" rel="noopener noreferrer"
             style={{
-              display: "flex", alignItems: "center", gap: 8,
-              textDecoration: "none",
-              padding: "6px 12px",
-              borderRadius: ds.rFull,
+              display: "flex", alignItems: "center", gap: 8, textDecoration: "none",
+              padding: "6px 12px", borderRadius: ds.rFull,
               border: "1px solid rgba(255,255,255,0.08)",
               background: "rgba(255,255,255,0.03)",
             }}
           >
-            <Image
-              src="https://avatars.githubusercontent.com/PRODHOSH"
-              alt="PRODHOSH"
-              width={22} height={22}
-              unoptimized
-              style={{ borderRadius: "50%", display: "block" }}
-            />
+            <Image src="https://avatars.githubusercontent.com/PRODHOSH" alt="PRODHOSH" width={22} height={22} unoptimized style={{ borderRadius: "50%", display: "block" }} />
             <span style={{ fontSize: 12, color: "rgba(255,255,255,0.35)" }}>
-              Built by{" "}
-              <span style={{ color: "rgba(255,255,255,0.6)", fontWeight: 600 }}>@PRODHOSH</span>
+              Built by <span style={{ color: "rgba(255,255,255,0.6)", fontWeight: 600 }}>@PRODHOSH</span>
             </span>
           </a>
 
           <a
-            href={REPO_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={REPO_URL} target="_blank" rel="noopener noreferrer"
             style={{
-              display: "flex", alignItems: "center", gap: 6,
-              textDecoration: "none",
-              padding: "6px 14px",
-              borderRadius: ds.rFull,
+              display: "flex", alignItems: "center", gap: 6, textDecoration: "none",
+              padding: "6px 14px", borderRadius: ds.rFull,
               border: "1px solid rgba(255,255,255,0.1)",
               background: "rgba(255,255,255,0.04)",
-              fontSize: 12, fontWeight: 500,
-              color: "rgba(255,255,255,0.45)",
+              fontSize: 12, fontWeight: 500, color: "rgba(255,255,255,0.45)",
               transition: "all 0.15s",
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "rgba(202,138,4,0.5)";
-              e.currentTarget.style.color = "#fbbf24";
-              e.currentTarget.style.background = "rgba(202,138,4,0.06)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
-              e.currentTarget.style.color = "rgba(255,255,255,0.45)";
-              e.currentTarget.style.background = "rgba(255,255,255,0.04)";
-            }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(202,138,4,0.5)"; e.currentTarget.style.color = "#fbbf24"; e.currentTarget.style.background = "rgba(202,138,4,0.06)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "rgba(255,255,255,0.45)"; e.currentTarget.style.background = "rgba(255,255,255,0.04)"; }}
           >
-            <Star size={13} />
-            Star on GitHub
+            <Star size={13} /> Star on GitHub
           </a>
 
           <SubscribeButton />
         </div>
 
-        {/* Disclaimer */}
         <p style={{ margin: 0, fontSize: 11, color: "rgba(255,255,255,0.2)", textAlign: "center" }}>
           Not affiliated with GirlScript Summer of Code or GirlScript Foundation ·{" "}
           <a href="/terms" style={{ color: "rgba(255,255,255,0.3)", textDecoration: "underline" }}>Terms &amp; Privacy</a>
