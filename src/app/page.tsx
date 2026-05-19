@@ -145,78 +145,87 @@ export default function Home() {
         )}
       </motion.div>
 
-      {/* Developer card */}
+      {/* Bottom bar */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.35, duration: 0.4 }}
         style={{
           position: "fixed",
-          bottom: 28,
+          bottom: 0,
+          left: 0, right: 0,
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
-          gap: 20,
-          flexWrap: "wrap",
-          justifyContent: "center",
+          gap: 10,
+          padding: "14px 24px 18px",
+          background: "linear-gradient(to top, rgba(23,23,23,0.95) 70%, transparent)",
         }}
       >
-        {/* Built by */}
-        <a
-          href="https://github.com/PRODHOSH"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: "flex", alignItems: "center", gap: 8,
-            textDecoration: "none",
-            padding: "6px 12px",
-            borderRadius: ds.rFull,
-            border: "1px solid rgba(255,255,255,0.08)",
-            background: "rgba(255,255,255,0.03)",
-          }}
-        >
-          <Image
-            src="https://avatars.githubusercontent.com/PRODHOSH"
-            alt="PRODHOSH"
-            width={22} height={22}
-            unoptimized
-            style={{ borderRadius: "50%", display: "block" }}
-          />
-          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.35)" }}>
-            Built by{" "}
-            <span style={{ color: "rgba(255,255,255,0.6)", fontWeight: 600 }}>@PRODHOSH</span>
-          </span>
-        </a>
+        {/* Built by + Star row */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
+          <a
+            href="https://github.com/PRODHOSH"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "flex", alignItems: "center", gap: 8,
+              textDecoration: "none",
+              padding: "6px 12px",
+              borderRadius: ds.rFull,
+              border: "1px solid rgba(255,255,255,0.08)",
+              background: "rgba(255,255,255,0.03)",
+            }}
+          >
+            <Image
+              src="https://avatars.githubusercontent.com/PRODHOSH"
+              alt="PRODHOSH"
+              width={22} height={22}
+              unoptimized
+              style={{ borderRadius: "50%", display: "block" }}
+            />
+            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.35)" }}>
+              Built by{" "}
+              <span style={{ color: "rgba(255,255,255,0.6)", fontWeight: 600 }}>@PRODHOSH</span>
+            </span>
+          </a>
 
-        {/* Star button */}
-        <a
-          href={REPO_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: "flex", alignItems: "center", gap: 6,
-            textDecoration: "none",
-            padding: "6px 14px",
-            borderRadius: ds.rFull,
-            border: "1px solid rgba(255,255,255,0.1)",
-            background: "rgba(255,255,255,0.04)",
-            fontSize: 12, fontWeight: 500,
-            color: "rgba(255,255,255,0.45)",
-            transition: "all 0.15s",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = "rgba(202,138,4,0.5)";
-            e.currentTarget.style.color = "#fbbf24";
-            e.currentTarget.style.background = "rgba(202,138,4,0.06)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
-            e.currentTarget.style.color = "rgba(255,255,255,0.45)";
-            e.currentTarget.style.background = "rgba(255,255,255,0.04)";
-          }}
-        >
-          <Star size={13} />
-          Star on GitHub
-        </a>
+          <a
+            href={REPO_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              textDecoration: "none",
+              padding: "6px 14px",
+              borderRadius: ds.rFull,
+              border: "1px solid rgba(255,255,255,0.1)",
+              background: "rgba(255,255,255,0.04)",
+              fontSize: 12, fontWeight: 500,
+              color: "rgba(255,255,255,0.45)",
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = "rgba(202,138,4,0.5)";
+              e.currentTarget.style.color = "#fbbf24";
+              e.currentTarget.style.background = "rgba(202,138,4,0.06)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
+              e.currentTarget.style.color = "rgba(255,255,255,0.45)";
+              e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+            }}
+          >
+            <Star size={13} />
+            Star on GitHub
+          </a>
+        </div>
+
+        {/* Disclaimer */}
+        <p style={{ margin: 0, fontSize: 11, color: "rgba(255,255,255,0.2)", textAlign: "center" }}>
+          Not affiliated with GirlScript Summer of Code or GirlScript Foundation ·{" "}
+          <a href="/terms" style={{ color: "rgba(255,255,255,0.3)", textDecoration: "underline" }}>Terms &amp; Privacy</a>
+        </p>
       </motion.div>
 
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>

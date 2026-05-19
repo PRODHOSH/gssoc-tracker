@@ -163,11 +163,9 @@ export default async function DashboardPage({ params }: Props) {
           </div>
         )}
 
-        <p style={{ textAlign: "center", fontSize: 12, color: ds.inkFaint, marginTop: 32 }}>
-          GSSoC 2026 Progress Tracker ·{" "}
-          <a href="https://gssoc.girlscript.org" target="_blank" rel="noopener noreferrer" style={{ color: ds.inkMute2 }}>
-            gssoc.girlscript.org
-          </a>
+        <p style={{ textAlign: "center", fontSize: 12, color: ds.inkFaint, marginTop: 32, lineHeight: 1.7 }}>
+          Not affiliated with GirlScript Summer of Code or GirlScript Foundation ·{" "}
+          <a href="/terms" style={{ color: ds.inkMute2, textDecoration: "underline" }}>Terms &amp; Privacy</a>
         </p>
       </div>
     </div>
