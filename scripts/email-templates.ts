@@ -225,7 +225,10 @@ function trackPills(tracks: string[]): string {
 }
 
 // ── Footer ────────────────────────────────────────────────────
-function emailFooter(github_id: string, timestamp: string): string {
+function emailFooter(github_id: string, timestamp: string, unsubscribeUrl?: string): string {
+  const unsub = unsubscribeUrl
+    ? `&nbsp;·&nbsp;<a href="${unsubscribeUrl}" style="color:${C.faint};text-decoration:underline;">Unsubscribe</a>`
+    : "";
   return `
   <div style="padding:16px 32px;background:${C.soft};">
     <p style="margin:0;font-size:11px;color:${C.faint};">
@@ -233,7 +236,7 @@ function emailFooter(github_id: string, timestamp: string): string {
       &nbsp;·&nbsp;
       ${new Date(timestamp).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
       &nbsp;·&nbsp;
-      GSSoC 2026 Progress Tracker
+      GSSoC 2026 Tracker${unsub}
     </p>
   </div>`;
 }
@@ -256,8 +259,9 @@ function wrap(body: string): string {
 export function buildChangeAlertHTML(opts: {
   curr: Profile;
   prev: { rank: number; score: number; role_scores: Record<string, number> };
+  unsubscribeUrl?: string;
 }): string {
-  const { curr, prev } = opts;
+  const { curr, prev, unsubscribeUrl } = opts;
 
   const body = `
     ${emailHeader(curr, new Date(curr.timestamp).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }))}
@@ -273,7 +277,7 @@ export function buildChangeAlertHTML(opts: {
     ${roleScoreTable(curr.role_scores)}
     ${trackPills(curr.tracks ?? [])}
     ${breakdownSection(curr.breakdown ?? [])}
-    ${emailFooter(curr.github_id, curr.timestamp)}
+    ${emailFooter(curr.github_id, curr.timestamp, unsubscribeUrl)}
   `;
 
   return wrap(body);
@@ -285,8 +289,9 @@ export function buildDailyDigestHTML(opts: {
   history_count: number;
   score_7d: number;   // change over last 7 days
   rank_7d: number;    // change over last 7 days (negative = improved)
+  unsubscribeUrl?: string;
 }): string {
-  const { profile: p, history_count, score_7d, rank_7d } = opts;
+  const { profile: p, history_count, score_7d, rank_7d, unsubscribeUrl } = opts;
 
   const dateStr = new Date().toLocaleDateString("en-IN", {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
@@ -333,7 +338,7 @@ export function buildDailyDigestHTML(opts: {
     ${roleScoreTable(p.role_scores)}
     ${trackPills(p.tracks ?? [])}
     ${breakdownSection(p.breakdown ?? [])}
-    ${emailFooter(p.github_id, p.timestamp)}
+    ${emailFooter(p.github_id, p.timestamp, unsubscribeUrl)}
   `;
 
   return wrap(body);

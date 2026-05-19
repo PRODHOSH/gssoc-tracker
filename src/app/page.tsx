@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Loader2, AlertCircle, Star, GitPullRequest } from "lucide-react";
 import { ds, fontMono } from "@/lib/ds";
 import { GitHubIcon } from "@/components/icons";
+import { SubscribeButton } from "@/components/SubscribeModal";
 import Image from "next/image";
 
 const REPO_URL = "https://github.com/PRODHOSH/gssoc-tracker";
@@ -162,7 +163,7 @@ export default function Home() {
           background: "linear-gradient(to top, rgba(23,23,23,0.95) 70%, transparent)",
         }}
       >
-        {/* Built by + Star row */}
+        {/* Built by + Star + Alerts row */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
           <a
             href="https://github.com/PRODHOSH"
@@ -219,6 +220,8 @@ export default function Home() {
             <Star size={13} />
             Star on GitHub
           </a>
+
+          <SubscribeButton />
         </div>
 
         {/* Disclaimer */}

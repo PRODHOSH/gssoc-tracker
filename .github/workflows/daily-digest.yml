@@ -31,6 +31,7 @@ jobs:
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
           NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
+          APP_URL: ${{ secrets.APP_URL }}
         run: npx tsx scripts/sync.ts --daily
 
       - name: Commit data changes

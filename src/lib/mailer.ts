@@ -17,7 +17,7 @@ export async function sendMail(opts: {
 }) {
   const transporter = createTransport();
   await transporter.sendMail({
-    from: `"GSSoC Tracker 🏆" <${process.env.SMTP_USER}>`,
+    from: `GSSoC Tracker <${process.env.SMTP_USER}>`,
     to: opts.to,
     subject: opts.subject,
     html: opts.html,
