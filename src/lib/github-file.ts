@@ -4,7 +4,7 @@
  * since serverless functions cannot write to the filesystem.
  */
 
-const REPO   = process.env.GH_REPO ?? "PRODHOSH/gssoc-tracker";
+const REPO   = process.env.GH_REPO ?? "prodhosh-iitm/gssoc-tracker";
 const BRANCH = "main";
 
 interface FileResponse {
