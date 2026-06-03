@@ -2,7 +2,7 @@
 
 > Not affiliated with GirlScript Summer of Code or GirlScript Foundation.
 
-![GSSoC PR Tracker — Home](https://raw.githubusercontent.com/prodhosh-iitm/gssoc-tracker/main/public/home.png)
+![GSSoC PR Tracker — Home](https://raw.githubusercontent.com/PRODHOSH/gssoc-tracker/main/public/home.png)
 
 ---
 
@@ -16,9 +16,9 @@ I built this for myself. I wanted to see all my labelled PRs in one place, under
 
 ## What it does
 
-![PR Tracker Dashboard](https://raw.githubusercontent.com/prodhosh-iitm/gssoc-tracker/main/public/dashboard.png)
+![PR Tracker Dashboard](https://raw.githubusercontent.com/PRODHOSH/gssoc-tracker/main/public/dashboard.png)
 
-![PR Tracker Dashboard 2](https://raw.githubusercontent.com/prodhosh-iitm/gssoc-tracker/main/public/dashboard2.png)
+![PR Tracker Dashboard 2](https://raw.githubusercontent.com/PRODHOSH/gssoc-tracker/main/public/dashboard2.png)
 
 You enter any GitHub username and the tracker pulls all their public PRs that carry GSSoC labels — `gssoc:approved`, `level:*`, `quality:*`, `type:*` — and calculates a score using the official formula:
 
@@ -34,13 +34,13 @@ The key difference from the official tracker — **this one is not limited to re
 
 ## Email alerts
 
-![Subscribe Form](https://raw.githubusercontent.com/prodhosh-iitm/gssoc-tracker/main/public/subscribe.png)
+![Subscribe Form](https://raw.githubusercontent.com/PRODHOSH/gssoc-tracker/main/public/subscribe.png)
 
 You can subscribe to get email alerts whenever your score or rank changes. Just hit "Get alerts" on the home page, enter your GitHub username and email, and choose whether you want to be notified on every score change or just get a daily morning digest.
 
 Everything is stored in this repo's `data/subscribers.json` — no external database. When your score changes, you get an email that shows exactly what changed, which PRs contributed, and a one-click unsubscribe link at the bottom.
 
-![Email Alert](https://raw.githubusercontent.com/prodhosh-iitm/gssoc-tracker/main/public/email-alert.png)
+![Email Alert](https://raw.githubusercontent.com/PRODHOSH/gssoc-tracker/main/public/email-alert.png)
 
 ---
 
@@ -55,7 +55,7 @@ This is an independent community tool. The scores shown here **may differ from t
 Clone the repo and install dependencies:
 
 ```bash
-git clone https://github.com/prodhosh-iitm/gssoc-tracker
+git clone https://github.com/PRODHOSH/gssoc-tracker
 cd gssoc-tracker
 npm install
 ```
@@ -82,6 +82,6 @@ Open `http://localhost:3000` and you're good to go.
 
 Built this to scratch my own itch, kept it because it turned out useful. If it helped you too, a star on the repo goes a long way.
 
-[![Star on GitHub](https://img.shields.io/github/stars/prodhosh-iitm/gssoc-tracker?style=social)](https://github.com/prodhosh-iitm/gssoc-tracker)
+[![Star on GitHub](https://img.shields.io/github/stars/PRODHOSH/gssoc-tracker?style=social)](https://github.com/PRODHOSH/gssoc-tracker)
 
-[GitHub](https://github.com/prodhosh-iitm) · [LinkedIn](https://www.linkedin.com/in/prodhoshvs)
+[GitHub](https://github.com/PRODHOSH) · [LinkedIn](https://www.linkedin.com/in/prodhoshvs)
