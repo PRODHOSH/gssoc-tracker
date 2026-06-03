@@ -216,7 +216,7 @@ export default function TermsPage() {
           flexWrap: "wrap", gap: 10,
         }}>
           <p style={{ margin: 0, fontSize: 12, color: "rgba(255,255,255,0.2)" }}>
-            Last updated: May 2026
+            Last updated: June 2026
           </p>
           <Link href="/" style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", textDecoration: "underline" }}>
             Back to tracker
