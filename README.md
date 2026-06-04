@@ -5,7 +5,7 @@
 <p align="center">
   <a href="https://gssoc-tracker.vercel.app">gssoc-tracker.vercel.app</a> &nbsp;·&nbsp;
   <a href="https://github.com/PRODHOSH/gssoc-tracker/stargazers">
-    <img src="https://img.shields.io/github/stars/PRODHOSH/gssoc-tracker?style=social" alt="Stars" />
+    <img src="https://badgen.net/github/stars/PRODHOSH/gssoc-tracker" alt="Stars" />
   </a>
 </p>
 
@@ -159,6 +159,6 @@ This is an independent community tool. Scores shown here may differ from the off
 
 Built this to scratch my own itch, kept it because it turned out useful for a lot of people. If it helped you, a star on the repo goes a long way.
 
-[![Star on GitHub](https://img.shields.io/github/stars/PRODHOSH/gssoc-tracker?style=social)](https://github.com/PRODHOSH/gssoc-tracker)
+[![Star on GitHub](https://badgen.net/github/stars/PRODHOSH/gssoc-tracker)](https://github.com/PRODHOSH/gssoc-tracker)
 
 [GitHub](https://github.com/PRODHOSH) · [LinkedIn](https://www.linkedin.com/in/prodhoshvs)
