@@ -167,7 +167,7 @@ export default function TermsPage() {
 
           <P><Bright>Email alerts (optional):</Bright> If you choose to subscribe to PR alerts, your email address is stored to send those notifications and for nothing else. You can remove it any time using the unsubscribe link in any alert email. We do not share your email with anyone.</P>
 
-          <P><Bright>Feedback (optional):</Bright> If you submit a rating or comment through the feedback widget, that message is sent directly to the creator&apos;s email. It is not stored in any database.</P>
+          <P><Bright>Feedback (optional):</Bright> If you submit a rating or comment through the feedback widget, your response is submitted anonymously to a Google Form. No name, email, or identifying information is collected. A flag is saved in your browser&apos;s local storage so the prompt does not appear again on the same device — this data never leaves your browser.</P>
 
           <P>The only external service called for tracker functionality is the GitHub REST API at api.github.com, which is subject to{" "}
             <a href="https://docs.github.com/en/site-policy/github-terms/github-terms-of-service" target="_blank" rel="noopener noreferrer" style={{ color: ds.primary, textDecoration: "underline" }}>GitHub&apos;s own terms</a>.
