@@ -18,20 +18,25 @@ export const metadata: Metadata = {
     "The unofficial community tracker for GirlScript Summer of Code 2026. Track contributor PR points, mentor review scores, and project leaderboards. Search any GitHub username to see live GSSoC stats. Built by PRODHOSH.",
   keywords: [
     "GSSoC 2026",
-    "GSSoC PR Tracker",
+    "GSSoC tracker",
+    "GSSoC PR tracker",
+    "GSSoC points tracker",
     "GirlScript Summer of Code 2026",
     "GirlScript Summer of Code tracker",
     "GSSoC leaderboard",
     "GSSoC contributor points",
     "GSSoC mentor tracker",
-    "GSSoC project admin",
-    "open source contribution tracker",
-    "GitHub PR tracker",
-    "GSSoC ranking",
-    "GSSoC scores",
-    "GSSoC approved PRs",
-    "open source GSSoC",
     "GSSoC points calculator",
+    "check GSSoC score",
+    "GSSoC 2026 contribution tracker",
+    "GSSoC PR validator",
+    "GSSoC approved PRs",
+    "gssoc:approved label",
+    "GSSoC PR check",
+    "does my PR count GSSoC",
+    "GSSoC ranking 2026",
+    "open source contribution tracker",
+    "GitHub PR tracker GSSoC",
   ],
   authors: [{ name: "PRODHOSH", url: "https://github.com/PRODHOSH" }],
   creator: "PRODHOSH",
@@ -79,6 +84,10 @@ export const metadata: Metadata = {
   verification: {
     google: "UaoSRKAHIpDzT6sD0-yziuiyGSNpEyp9RaDEA009Vcs",
   },
+  other: {
+    // Bing Webmaster verification — replace with your code from bing.com/webmasters
+    "msvalidate.01": "REPLACE_WITH_BING_CODE",
+  },
   category: "technology",
 };
 
@@ -117,6 +126,60 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           },
           "query-input": "required name=search_term_string",
         },
+      },
+      {
+        "@type": "FAQPage",
+        "@id": `${BASE_URL}/#faq`,
+        mainEntity: [
+          {
+            "@type": "Question",
+            name: "How are GSSoC 2026 points calculated?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "GSSoC 2026 points are calculated as: 50 base points + (difficulty score × quality multiplier) + type bonuses. Difficulty labels set the base (level:beginner=20, level:intermediate=35, level:advanced=55, level:critical=80). Quality labels apply a multiplier (quality:clean=×1.2, quality:exceptional=×1.5). Type labels add bonuses from 5 to 20 points. Only merged PRs with the gssoc:approved label count.",
+            },
+          },
+          {
+            "@type": "Question",
+            name: "What is the gssoc:approved label?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "The gssoc:approved label is applied by GSSoC mentors to PRs that meet the quality bar for GSSoC 2026. Without this label, a PR scores 0 points regardless of other labels. It is the primary requirement for a PR to count toward your GSSoC score.",
+            },
+          },
+          {
+            "@type": "Question",
+            name: "How do I check my GSSoC 2026 score?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: `Go to ${BASE_URL}, select Contributor, enter your GitHub username, and see your full GSSoC 2026 score — including a breakdown of every approved PR, difficulty levels, quality multipliers, and type bonuses.`,
+            },
+          },
+          {
+            "@type": "Question",
+            name: "Does my PR count for GSSoC 2026?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: `A PR counts for GSSoC 2026 if it: (1) has the gssoc:approved label from a mentor, (2) is merged, (3) is in an officially registered GSSoC 2026 project repo, and (4) does not have any invalid flags (gssoc:invalid, gssoc:spam, gssoc:ai-slop). Use the PR Validator at ${BASE_URL}/pr-check to check any specific PR instantly.`,
+            },
+          },
+          {
+            "@type": "Question",
+            name: "What is GSSoC PR Tracker?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "GSSoC PR Tracker is an unofficial community tool that lets GirlScript Summer of Code 2026 contributors and mentors track their contributions, scores, and rankings in real time. It fetches data from the GitHub API and filters to officially registered GSSoC 2026 projects.",
+            },
+          },
+          {
+            "@type": "Question",
+            name: "How do I validate a GSSoC pull request?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: `Go to ${BASE_URL}/pr-check, paste the GitHub PR link, and get an instant verdict. The PR Validator checks the gssoc:approved label, merge status, whether the repo is officially registered, and any disqualifying flags — then shows the exact points breakdown.`,
+            },
+          },
+        ],
       },
     ],
   };
