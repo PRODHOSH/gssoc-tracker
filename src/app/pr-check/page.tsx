@@ -84,6 +84,11 @@ export default function PrCheckPage() {
             {" "}for more on how this works.
           </p>
         </div>
+
+        {/* Disclaimer */}
+        <p style={{ marginTop: 20, fontSize: 11, color: ds.inkFaint, textAlign: "center", lineHeight: 1.7 }}>
+          Not affiliated with GirlScript Summer of Code or GirlScript Foundation. Built for the community.
+        </p>
       </div>
     </div>
   );
