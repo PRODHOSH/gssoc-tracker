@@ -1,4 +1,5 @@
 import { unstable_cache } from "next/cache";
+import { GSSOC_REPO_SET } from "@/data/gssoc-repos";
 import type {
   GitHubUser,
   RawGitHubPR,
@@ -185,7 +186,10 @@ async function _buildPRTrackerData(username: string): Promise<PRTrackerData> {
     fetchGSSoCPRs(username),
   ]);
 
-  const allPRs: TrackedPR[] = rawPRs.map((pr) => {
+  const allPRs: TrackedPR[] = rawPRs.filter((pr) => {
+    const { name: repo } = repoFromUrl(pr.repository_url);
+    return GSSOC_REPO_SET.has(repo.toLowerCase());
+  }).map((pr) => {
     const labelNames = pr.labels.map((l) => l.name);
     const labelColors: Record<string, string> = {};
     pr.labels.forEach((l) => {

@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { fetchGitHubUser } from "@/lib/pr-tracker";
+import { GSSOC_REPO_SET } from "@/data/gssoc-repos";
 import type { RawGitHubPR, GitHubUser } from "@/types/pr-tracker";
 
 /* ── Mentor scoring ──────────────────────────────────────────── */
@@ -99,10 +100,13 @@ async function _buildMentorTrackerData(username: string): Promise<MentorTrackerD
     fetchMentorPRs(normalized),
   ]);
 
-  // Filter locally: only PRs that also carry gssoc:approved
-  const approvedPRs = rawPRs.filter((pr) =>
-    pr.labels.some((l) => l.name === "gssoc:approved")
-  );
+  // Filter: only gssoc:approved PRs in officially registered GSSoC 2026 repos
+  const approvedPRs = rawPRs.filter((pr) => {
+    if (!pr.labels.some((l) => l.name === "gssoc:approved")) return false;
+    const parts = pr.repository_url.split("/");
+    const repoKey = `${parts[parts.length - 2]}/${parts[parts.length - 1]}`.toLowerCase();
+    return GSSOC_REPO_SET.has(repoKey);
+  });
 
   const prs: MentorPR[] = approvedPRs.map((pr) => {
     const labelNames = pr.labels.map((l) => l.name);

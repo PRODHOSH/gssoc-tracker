@@ -138,15 +138,18 @@ export default function TermsPage() {
         </Section>
 
         {/* Section 2 */}
-        <Section icon={<AlertTriangle size={15} color="#fbbf24" />} title="How this differs from the official tracker">
+        <Section icon={<AlertTriangle size={15} color="#fbbf24" />} title="How this aligns with the official tracker">
           <Note>
-            <strong>The official GSSoC leaderboard only counts PRs merged into repos that are officially registered with GSSoC.</strong> This tool does not have that filter.
+            <strong>We now filter to the 424 officially registered GSSoC 2026 projects.</strong> Your score here reflects only PRs in repos on that list — the same set the official leaderboard uses.
           </Note>
           <P>
-            This tracker picks up <Bright>all public PRs</Bright> on your GitHub profile that carry GSSoC labels, whether or not the repo is officially listed in the programme. That means your score here <Hi>may be higher</Hi> than on the official leaderboard.
+            We fetch the project list directly from <Bright>gssoc.girlscript.org/api/projects</Bright> and check every PR against it. If a repo is not on the list, that PR does not appear in your tracker and does not count toward your score here.
           </P>
           <P>
-            Use this to understand your own activity and label patterns. For your official standing, always check the GSSoC leaderboard.
+            The <Hi>PR Validator</Hi> at <Bright>/pr-check</Bright> lets you paste any PR link and see exactly which category it falls into — valid, unofficial, not approved, and so on. It also shows the full points breakdown for that specific PR.
+          </P>
+          <P>
+            One thing to keep in mind: the official list is updated as new projects get approved during the programme. We refresh our local copy periodically. If a repo was added recently and your PR is not showing up, try again in a day or two.
           </P>
         </Section>
 
@@ -176,6 +179,16 @@ export default function TermsPage() {
           <P>
             Questions about privacy? Email{" "}
             <a href="mailto:prodhoshlaptop@gmail.com" style={{ color: ds.primary, textDecoration: "underline" }}>prodhoshlaptop@gmail.com</a>.
+          </P>
+        </Section>
+
+        {/* Section 3b — PR Validator */}
+        <Section icon={<Shield size={15} color={ds.primary} />} title="PR Validator">
+          <P>
+            The <Hi>PR Validator</Hi> at <Bright>/pr-check</Bright> lets anyone paste a GitHub PR link and instantly see whether it qualifies for GSSoC 2026 points. It checks the gssoc:approved label, merge status, and whether the repo is in the official project list, then shows the exact points breakdown.
+          </P>
+          <P>
+            No data from this check is stored. The PR is fetched live from the GitHub API, analysed, and the result is shown only to you.
           </P>
         </Section>
 

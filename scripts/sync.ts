@@ -358,7 +358,7 @@ async function main() {
   if (!rateLimitHit && remaining.size > 0) {
     console.log(`\n📡 Phase 2 — sequential scan for remaining: [${[...remaining].join(", ")}]`);
     let seqPg    = 1;
-    const MAX_SEQ = 500; // up to 50 000 participants
+    const MAX_SEQ = 100; // top 10 000 participants — if not found here they're not yet active
     let seqCount  = 0;
     while (!rateLimitHit && remaining.size > 0 && seqCount < MAX_SEQ) {
       if (!fetchedPages.has(seqPg)) {

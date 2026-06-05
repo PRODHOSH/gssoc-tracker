@@ -29,7 +29,7 @@ That is why I put it out for the community. It is not trying to replace the offi
 
 ## What it does
 
-You pick your role — contributor or mentor — enter your GitHub username, and the tracker pulls your relevant PRs and calculates your score.
+You pick your role — contributor or mentor — enter your GitHub username, and the tracker pulls your relevant PRs and calculates your score. Everything is filtered to officially registered GSSoC 2026 projects, so the score you see here aligns with what the official leaderboard uses.
 
 ### Contributor tracker
 
@@ -58,11 +58,9 @@ Score = 50 + (difficulty × quality multiplier) + type bonus
 
 PRs tagged `gssoc:invalid`, `gssoc:spam`, or `gssoc:ai-slop` score 0.
 
-The key difference from the official tracker: **this one is not limited to registered repos**. It reads all your public PRs with GSSoC labels, so your score here may be higher than the official leaderboard.
-
 ### Mentor tracker
 
-If you are a GSSoC mentor, you can track the PRs you have reviewed. It searches for PRs labelled `mentor:yourusername` and `gssoc:approved` and calculates your mentor score. Only **merged** PRs count toward your total — unmerged PRs are shown with their projected points but excluded from the score.
+If you are a GSSoC mentor, you can track the PRs you have reviewed. It searches for PRs labelled `mentor:yourusername` and `gssoc:approved` — filtered to official repos — and calculates your mentor score. Only **merged** PRs count toward your total.
 
 ```
 Score = level base + quality bonus
@@ -76,6 +74,23 @@ Score = level base + quality bonus
 | `level:critical` | 50 pts |
 | `quality:clean` | +5 pts |
 | `quality:exceptional` | +10 pts |
+
+### PR Validator
+
+![PR Validator](public/pr-check.png)
+
+Ever submitted a PR and wondered — does this actually count? Go to [/pr-check](https://gssoc-tracker.vercel.app/pr-check), paste the GitHub PR link, and you get an instant answer.
+
+It runs through every condition that matters:
+
+- Is the `gssoc:approved` label on it?
+- Has it been merged?
+- Is the repo part of the officially registered GSSoC 2026 projects?
+- Does it have any disqualifying flags like `gssoc:spam` or `gssoc:ai-slop`?
+
+For each condition it tells you clearly what is passing, what is missing, and what you need to fix. If the PR does count, it shows the full points breakdown — base score, difficulty, quality multiplier, type bonuses — so you know exactly how many points it is worth.
+
+No username needed. Just the PR link.
 
 ### Analytics
 
@@ -136,7 +151,7 @@ Open `http://localhost:3000` and you are good to go.
 
 ## Tech stack
 
-- **Next.js 15** (App Router, server components, `unstable_cache` for GitHub API caching)
+- **Next.js 16** (App Router, server components, `unstable_cache` for GitHub API caching)
 - **TypeScript**
 - **Recharts** for all charts
 - **Framer Motion** for animations
@@ -149,9 +164,10 @@ No database. No auth. No external services beyond GitHub API and Gmail.
 
 ## Important note
 
-This is an independent community tool. Scores shown here may differ from the official GSSoC leaderboard because this tracker counts PRs from all repos, not just officially registered ones. For official standings, always check the GSSoC leaderboard directly.
+This is an independent community tool, not affiliated with GirlScript Summer of Code or GirlScript Foundation. Scores are filtered to officially registered GSSoC 2026 projects, so they align with the official leaderboard. For your exact official standing, always check the GSSoC leaderboard directly.
 
 ---
+
 ## Star History
 
 <a href="https://www.star-history.com/?repos=PRODHOSH%2Fgssoc-tracker&type=date&legend=top-left">

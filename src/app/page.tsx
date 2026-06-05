@@ -1,5 +1,5 @@
 "use client";
-import { useState, FormEvent } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, AlertCircle, Star, GitPullRequest, Users, ArrowLeft } from "lucide-react";
@@ -34,11 +34,21 @@ const ROLES: { id: Role; icon: React.ReactNode; label: string; desc: string; bor
 
 export default function Home() {
   const router = useRouter();
-  const [step, setStep]   = useState<"role" | "input">("role");
-  const [role, setRole]   = useState<Role | null>(null);
-  const [input, setInput] = useState("");
-  const [state, setState] = useState<"idle" | "loading" | "error">("idle");
-  const [errMsg, setErrMsg] = useState("");
+  const [step, setStep]         = useState<"role" | "input">("role");
+  const [role, setRole]         = useState<Role | null>(null);
+  const [input, setInput]       = useState("");
+  const [state, setState]       = useState<"idle" | "loading" | "error">("idle");
+  const [errMsg, setErrMsg]     = useState("");
+  const [showBanner, setShowBanner] = useState(false);
+
+  useEffect(() => {
+    if (!localStorage.getItem("gssoc_prcheck_v1")) setShowBanner(true);
+  }, []);
+
+  function dismissBanner() {
+    localStorage.setItem("gssoc_prcheck_v1", "1");
+    setShowBanner(false);
+  }
 
   function selectRole(r: Role) {
     setRole(r);
@@ -81,7 +91,34 @@ export default function Home() {
       alignItems: "center", justifyContent: "center",
       fontFamily: "var(--font-sans)",
       padding: "40px 24px",
+      position: "relative",
     }}>
+
+      {/* What's new banner */}
+      {showBanner && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, zIndex: 50,
+          background: "rgba(62,207,142,0.07)",
+          borderBottom: "1px solid rgba(62,207,142,0.15)",
+          padding: "9px 20px",
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
+        }}>
+          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", lineHeight: 1 }}>
+            ✨ New — <a href="/pr-check" style={{ color: ds.primary, fontWeight: 600, textDecoration: "none" }}>PR Validator</a>
+            {" "}· paste any PR link and instantly check if it counts for GSSoC 2026
+          </span>
+          <button
+            onClick={dismissBanner}
+            style={{
+              background: "none", border: "none", cursor: "pointer",
+              color: "rgba(255,255,255,0.3)", fontSize: 16, lineHeight: 1,
+              padding: "0 4px", flexShrink: 0,
+            }}
+          >
+            ×
+          </button>
+        </div>
+      )}
       <motion.div
         initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -126,6 +163,16 @@ export default function Home() {
               ))}
               <div style={{ marginTop: 8, display: "flex", justifyContent: "center" }}>
                 <HomePointsGuide />
+              </div>
+              <div style={{ marginTop: 6, textAlign: "center" }}>
+                <a
+                  href="/pr-check"
+                  style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", textDecoration: "none", transition: "color 0.13s" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = ds.primary)}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.3)")}
+                >
+                  or validate a specific PR →
+                </a>
               </div>
             </motion.div>
           )}
