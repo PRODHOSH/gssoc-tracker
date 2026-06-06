@@ -400,5 +400,23 @@
       "score_before": 4208,
       "score_after": 4208
     }
+  },
+  {
+    "timestamp": "2026-06-06T13:53:45.171Z",
+    "type": "change_alert",
+    "subject": "GSSoC Alert: Score +15 pts · Rank #404",
+    "email_sent": true,
+    "changes": {
+      "rank_before": 222,
+      "rank_after": 404,
+      "score_before": 4208,
+      "score_after": 4223
+    }
+  },
+  {
+    "timestamp": "2026-06-06T13:53:46.159Z",
+    "type": "daily_digest",
+    "subject": "GSSoC Daily: Score 4,223 pts · Rank #404",
+    "email_sent": true
   }
 ]
