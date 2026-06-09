@@ -38,7 +38,7 @@ const ROLES: RoleConfig[] = [
   },
 ];
 
-function EmbeddedGlobalRankBox() {
+function EmbeddedGlobalRankCard() {
   const [username, setUsername] = useState("");
   const [rankInfo, setRankInfo] = useState<{ rank: number; points: number } | null>(null);
   const [loading, setLoading] = useState(false);
@@ -245,71 +245,137 @@ export default function Home() {
           <button
             onClick={dismissBanner}
             style={{
-              background: "none", border: "none", cursor: "pointer",
-              color: "rgba(255,255,255,0.3)", fontSize: 16, lineHeight: 1,
-              padding: "0 4px", flexShrink: 0,
+              background: "transparent",
+              border: "none",
+              color: "rgba(255,255,255,0.4)",
+              cursor: "pointer",
+              fontSize: 14,
             }}
           >
             ×
           </button>
         </div>
       )}
-      <motion.div
-        initial={{ opacity: 0, y: -16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35 }}
-        style={{ width: "100%", maxWidth: 480, textAlign: "center" }}
-      >
-        <div style={{
-          display: "inline-flex", alignItems: "center", justifyContent: "center",
-          width: 52, height: 52, borderRadius: 14,
-          background: "rgba(62,207,142,0.1)", border: "1px solid rgba(62,207,142,0.2)",
-          marginBottom: 24,
-        }}>
-          <GitPullRequest size={24} color={ds.primary} />
-        </div>
 
-        <h1 style={{
-          margin: "0 0 8px",
-          fontSize: "clamp(26px, 5vw, 36px)", fontWeight: 700,
-          color: "#fff", letterSpacing: "-0.03em", lineHeight: 1.1,
-        }}>
+      <div style={{ maxWidth: 440, width: "100%", textAlign: "center" }}>
+        <h1 style={{ fontSize: 28, fontWeight: 800, color: "#fff", marginBottom: 8 }}>
           GSSoC Tracker
         </h1>
-
-        <p style={{ margin: "0 0 36px", fontSize: 15, color: "rgba(255,255,255,0.35)", lineHeight: 1.6 }}>
-          {step === "role" ? "Who are you in GSSoC 2026?" : "Enter your details to get started"}
+        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", marginBottom: 32 }}>
+          Monitor your contributions and metrics live
         </p>
 
         <AnimatePresence mode="wait">
-          {step === "role" && (
+          {step === "role" ? (
             <motion.div
               key="role"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.2 }}
-              style={{ display: "flex", flexDirection: "column", gap: 10 }}
+              exit={{ opacity: 0, y: -10 }}
+              style={{ display: "flex", flexDirection: "column", gap: 12 }}
             >
               {ROLES.map((r) => (
                 <RoleCard key={r.id} role={r} onSelect={selectRole} />
               ))}
-                            <div style={{ marginTop: 8, display: "flex", justifyContent: "center" }}>
-                <HomePointsGuide />
-              </div>
               
-              {/* Global Rank Component Box */}
-              <EmbeddedGlobalRankBox />
+              <EmbeddedGlobalRankCard />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="input"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <button
+                onClick={goBack}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "rgba(255,255,255,0.4)",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  fontSize: 13,
+                  marginBottom: 16,
+                  padding: 0,
+                }}
+              >
+                <ArrowLeft size={14} /> Back
+              </button>
 
-              <div style={{ marginTop: 6, textAlign: "center" }}>
-                <a
-                  href="/pr-check"
-                  style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", textDecoration: "none", transition: "color 0.13s" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = ds.primary)}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.3)")}
-                >
-                  or validate a specific PR →
-                </a>
-              </div>
+              <form onSubmit={submit} style={{ textAlign: "left" }}>
+                <label style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", marginBottom: 8, display: "block" }}>
+                  Enter your GitHub username
+                </label>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="e.g. nancy-verma780"
+                    disabled={state === "loading"}
+                    style={{
+                      flex: 1,
+                      background: "rgba(0,0,0,0.3)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      borderRadius: 8,
+                      padding: "10px 14px",
+                      color: "#fff",
+                      fontSize: 14,
+                      outline: "none",
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    disabled={state === "loading"}
+                    style={{
+                      background: activeRole?.id === "contributor" ? ds.primary : "#fbbf24",
+                      color: "#000",
+                      border: "none",
+                      borderRadius: 8,
+                      padding: "0 20px",
+                      fontWeight: 600,
+                      fontSize: 14,
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                  >
+                    {state === "loading" && <Loader2 size={16} className="animate-spin" />}
+                    Track
+                  </button>
+                </div>
+
+                {state === "error" && (
+                  <div style={{
+                    marginTop: 12,
+                    background: "rgba(239,68,68,0.05)",
+                    border: "1px solid rgba(239,68,68,0.15)",
+                    borderRadius: 8,
+                    padding: "10px 12px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    color: "#ef4444",
+                    fontSize: 13,
+                  }}>
+                    <AlertCircle size={16} />
+                    <span>{errMsg}</span>
+                  </div>
+                )}
+              </form>
             </motion.div>
           )}
+        </AnimatePresence>
+
+        <div style={{ marginTop: 48 }}>
+          <HomePointsGuide />
+        </div>
+      </div>
+    </div>
+  );
+}
+
