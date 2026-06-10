@@ -29,6 +29,11 @@ const TYPES  = [
   { label: "type:devops",         value: "+15 pts" },
   { label: "type:security",       value: "+20 pts" },
 ];
+const BLOCKING = [
+  { label: "gssoc:invalid", value: "0 pts" },
+  { label: "gssoc:spam",    value: "0 pts" },
+  { label: "gssoc:ai-slop", value: "0 pts" },
+];
 
 function LabelChip({ label }: { label: string }) {
   const c = getLabelChipColors(label);
@@ -46,10 +51,12 @@ function LabelChip({ label }: { label: string }) {
   );
 }
 
-function Section({ title, rows, isMultiplier = false }: {
+function Section({ title, rows, isMultiplier = false, accent, footnote }: {
   title: string;
   rows: { label: string; value: string; note?: string }[];
   isMultiplier?: boolean;
+  accent?: string;
+  footnote?: string;
 }) {
   return (
     <div style={{ marginBottom: 20 }}>
@@ -75,7 +82,7 @@ function Section({ title, rows, isMultiplier = false }: {
               <span style={{
                 fontSize: 13, fontWeight: 700,
                 fontFamily: fontMono,
-                color: isMultiplier ? "#1e40af" : ds.primaryDeep,
+                color: accent ?? (isMultiplier ? "#1e40af" : ds.primaryDeep),
                 minWidth: 50, textAlign: "right",
               }}>
                 {r.value}
@@ -84,6 +91,11 @@ function Section({ title, rows, isMultiplier = false }: {
           </div>
         ))}
       </div>
+      {footnote && (
+        <p style={{ margin: "8px 0 0", fontSize: 11, color: ds.inkFaint, lineHeight: 1.5 }}>
+          {footnote}
+        </p>
+      )}
     </div>
   );
 }
@@ -127,7 +139,7 @@ function Modal({ onClose }: { onClose: () => void }) {
               Scoring Guide
             </p>
             <p style={{ margin: 0, fontSize: 11, color: ds.inkMute2, fontFamily: fontMono }}>
-              Formula: 50 + (difficulty × quality) + type_bonus
+              Formula: 50 + (difficulty × quality) + type_bonus, capped at 175/PR
             </p>
           </div>
           <button
@@ -150,9 +162,28 @@ function Modal({ onClose }: { onClose: () => void }) {
         {/* Scrollable body */}
         <div style={{ padding: "20px", overflowY: "auto" }}>
           <Section title="Base (every approved PR)" rows={BASE} />
-          <Section title="Difficulty" rows={DIFF} />
-          <Section title="Quality Multiplier" rows={QUAL} isMultiplier />
-          <Section title="Type Bonus" rows={TYPES} />
+          <Section
+            title="Difficulty"
+            rows={DIFF}
+            footnote="Multiple level labels on one PR? Only the lowest counts — labels can't be stacked to inflate points."
+          />
+          <Section
+            title="Quality Multiplier"
+            rows={QUAL}
+            isMultiplier
+            footnote="Multiple quality labels? The lowest counts. quality:exceptional also needs a substantive mentor review comment (over 30 characters) — without one it falls back to ×1.0."
+          />
+          <Section
+            title="Type Bonus"
+            rows={TYPES}
+            footnote="Every PR is capped at 175 pts total, no matter how many labels are applied."
+          />
+          <Section
+            title="Blocking Labels"
+            rows={BLOCKING}
+            accent="#dc2626"
+            footnote="Any of these override gssoc:approved — the PR scores 0 pts regardless of other labels."
+          />
 
           <div style={{
             background: "rgba(62,207,142,0.05)",
@@ -170,6 +201,18 @@ function Modal({ onClose }: { onClose: () => void }) {
               = 50 + (55 × 1.5) + 15 = <span style={{ color: ds.primaryDeep }}>147 pts</span>
             </p>
           </div>
+
+          <p style={{ margin: "16px 0 0", fontSize: 11, color: ds.inkFaint, textAlign: "center", lineHeight: 1.6 }}>
+            Full label guide:{" "}
+            <a
+              href="https://gssoc.girlscript.org/guidelines/labeling"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: ds.primaryDeep, fontWeight: 600, textDecoration: "none" }}
+            >
+              gssoc.girlscript.org/guidelines/labeling
+            </a>
+          </p>
         </div>
       </div>
 

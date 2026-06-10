@@ -30,7 +30,7 @@ interface PrCheckResult {
   scoring: {
     base: number;
     difficultyLabel: string | null; difficultyScore: number; usedDefaultDiff: boolean;
-    qualityLabel: string | null; qualityMultiplier: number; qualityBonus: number;
+    qualityLabel: string | null; qualityMultiplier: number; qualityBonus: number; qualityDowngraded: boolean;
     typeBonuses: string[]; typeBonusTotal: number; total: number;
   };
   flags: { hasApproved: boolean; invalidLabel: string | null; isMerged: boolean; isOfficial: boolean; };
@@ -422,8 +422,11 @@ export function PrChecker() {
             {/* Quality label — advisory */}
             {result.flags.hasApproved && result.flags.isMerged && !result.flags.invalidLabel && result.scoring.qualityLabel && (
               <CheckRow
-                status="info"
+                status={result.scoring.qualityDowngraded ? "warn" : "info"}
                 label={`Quality: ${result.scoring.qualityLabel} (×${result.scoring.qualityMultiplier} on difficulty → +${result.scoring.qualityBonus} pts)`}
+                detail={result.scoring.qualityDowngraded
+                  ? "quality:exceptional needs a substantive mentor review comment (>30 chars). None was found, so the multiplier fell back to ×1.0. A mentor can leave a review comment explaining why the PR is exceptional to restore the ×1.5 bonus."
+                  : undefined}
               />
             )}
 

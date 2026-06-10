@@ -31,6 +31,16 @@ const TYPE_BONUSES: Record<string, number> = {
 };
 
 const INVALID_LABELS = new Set(["gssoc:invalid", "gssoc:spam", "gssoc:ai-slop"]);
+const MAX_PR_POINTS = 175;
+const MIN_EXCEPTIONAL_REVIEW_LENGTH = 30;
+
+// When multiple difficulty/quality labels are applied, the lowest one wins —
+// this protects against label-stacking inflating a PR's score.
+function lowestLabel(labelNames: string[], scores: Record<string, number>): string | null {
+  const matched = labelNames.filter((l) => l in scores);
+  if (!matched.length) return null;
+  return matched.reduce((lowest, l) => (scores[l] < scores[lowest] ? l : lowest));
+}
 
 export async function GET(req: NextRequest) {
   const rawUrl = req.nextUrl.searchParams.get("url")?.trim() ?? "";
@@ -109,15 +119,35 @@ export async function GET(req: NextRequest) {
   // Points only apply for merged + approved + not flagged
   const canScore = hasApproved && isMerged && !invalidLabel && isOfficial;
 
-  const difficultyLabel    = canScore ? (labelNames.find(l => l in DIFFICULTY_SCORES) ?? null) : null;
+  const difficultyLabel    = canScore ? lowestLabel(labelNames, DIFFICULTY_SCORES) : null;
   const usedDefaultDiff    = canScore && !difficultyLabel;
   const difficultyScore    = canScore ? (difficultyLabel ? DIFFICULTY_SCORES[difficultyLabel] : 20) : 0;
-  const qualityLabel       = canScore ? (labelNames.find(l => l in QUALITY_MULTIPLIERS) ?? null) : null;
-  const qualityMultiplier  = qualityLabel ? QUALITY_MULTIPLIERS[qualityLabel] : 1;
+  const qualityLabel       = canScore ? lowestLabel(labelNames, QUALITY_MULTIPLIERS) : null;
+  let qualityMultiplier    = qualityLabel ? QUALITY_MULTIPLIERS[qualityLabel] : 1;
+
+  // quality:exceptional requires a substantive review comment (>30 chars);
+  // without one it falls back to the ×1.0 multiplier.
+  let qualityDowngraded = false;
+  if (canScore && qualityLabel === "quality:exceptional") {
+    try {
+      const reviewsRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/pulls/${prNum}/reviews`, { headers, cache: "no-store" });
+      if (reviewsRes.ok) {
+        const reviews = await reviewsRes.json() as { body: string }[];
+        const hasSubstantiveReview = reviews.some(r => r.body && r.body.trim().length > MIN_EXCEPTIONAL_REVIEW_LENGTH);
+        if (!hasSubstantiveReview) {
+          qualityMultiplier = 1;
+          qualityDowngraded = true;
+        }
+      }
+    } catch {
+      // can't verify — don't penalize on a failed lookup
+    }
+  }
+
   const qualityBonus       = canScore ? Math.round(difficultyScore * (qualityMultiplier - 1)) : 0;
   const typeBonuses        = canScore ? labelNames.filter(l => l in TYPE_BONUSES) : [];
   const typeBonusTotal     = typeBonuses.reduce((s, l) => s + TYPE_BONUSES[l], 0);
-  const points             = canScore ? Math.round(50 + difficultyScore * qualityMultiplier + typeBonusTotal) : 0;
+  const points             = canScore ? Math.min(Math.round(50 + difficultyScore * qualityMultiplier + typeBonusTotal), MAX_PR_POINTS) : 0;
 
   return NextResponse.json({
     pr: {
@@ -145,6 +175,7 @@ export async function GET(req: NextRequest) {
       qualityLabel,
       qualityMultiplier,
       qualityBonus,
+      qualityDowngraded,
       typeBonuses,
       typeBonusTotal,
       total: points,

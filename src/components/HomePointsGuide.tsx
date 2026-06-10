@@ -28,6 +28,11 @@ const C_TYPES = [
   { label: "type:devops",        value: "+15 pts" },
   { label: "type:security",      value: "+20 pts" },
 ];
+const C_BLOCKING = [
+  { label: "gssoc:invalid", value: "0 pts" },
+  { label: "gssoc:spam",    value: "0 pts" },
+  { label: "gssoc:ai-slop", value: "0 pts" },
+];
 
 /* ── Mentor data ─────────────────────────────────────────────── */
 const M_LEVELS = [
@@ -62,7 +67,7 @@ function Row({ label, value, accent }: { label: string; value: string; accent: s
   );
 }
 
-function Section({ title, rows, accent, isMultiplier = false }: { title: string; rows: { label: string; value: string }[]; accent: string; isMultiplier?: boolean }) {
+function Section({ title, rows, accent, isMultiplier = false, footnote }: { title: string; rows: { label: string; value: string }[]; accent: string; isMultiplier?: boolean; footnote?: string }) {
   return (
     <div style={{ marginBottom: 20 }}>
       <p style={{ margin: "0 0 10px", fontSize: 10, fontWeight: 800, color: ds.inkMute2, letterSpacing: "0.1em", textTransform: "uppercase" }}>
@@ -71,6 +76,11 @@ function Section({ title, rows, accent, isMultiplier = false }: { title: string;
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         {rows.map((r) => <Row key={r.label} label={r.label} value={r.value} accent={isMultiplier ? "#1e40af" : accent} />)}
       </div>
+      {footnote && (
+        <p style={{ margin: "8px 0 0", fontSize: 11, color: ds.inkFaint, lineHeight: 1.5 }}>
+          {footnote}
+        </p>
+      )}
     </div>
   );
 }
@@ -80,9 +90,31 @@ function ContributorTab() {
   return (
     <div style={{ padding: "20px", overflowY: "auto" }}>
       <Section title="Base (every approved PR)" rows={[{ label: "gssoc:approved", value: "+50 pts" }]} accent={ds.primaryDeep} />
-      <Section title="Difficulty" rows={C_DIFF} accent={ds.primaryDeep} />
-      <Section title="Quality Multiplier" rows={C_QUAL} accent={ds.primaryDeep} isMultiplier />
-      <Section title="Type Bonus" rows={C_TYPES} accent={ds.primaryDeep} />
+      <Section
+        title="Difficulty"
+        rows={C_DIFF}
+        accent={ds.primaryDeep}
+        footnote="Multiple level labels on one PR? Only the lowest counts — labels can't be stacked to inflate points."
+      />
+      <Section
+        title="Quality Multiplier"
+        rows={C_QUAL}
+        accent={ds.primaryDeep}
+        isMultiplier
+        footnote="Multiple quality labels? The lowest counts. quality:exceptional also needs a substantive mentor review comment (over 30 characters) — without one it falls back to ×1.0."
+      />
+      <Section
+        title="Type Bonus"
+        rows={C_TYPES}
+        accent={ds.primaryDeep}
+        footnote="Every PR is capped at 175 pts total, no matter how many labels are applied."
+      />
+      <Section
+        title="Blocking Labels"
+        rows={C_BLOCKING}
+        accent="#dc2626"
+        footnote="Any of these override gssoc:approved — the PR scores 0 pts regardless of other labels."
+      />
       <div style={{ background: "rgba(62,207,142,0.05)", border: "1px solid rgba(62,207,142,0.2)", borderRadius: ds.rMd, padding: "12px 14px" }}>
         <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 700, color: ds.primaryDeep, letterSpacing: "0.06em", textTransform: "uppercase" }}>Example</p>
         <p style={{ margin: "0 0 4px", fontSize: 12, color: ds.inkMute, fontFamily: fontMono }}>gssoc:approved + level:advanced + quality:exceptional + type:devops</p>
@@ -90,6 +122,17 @@ function ContributorTab() {
           = 50 + (55 × 1.5) + 15 = <span style={{ color: ds.primaryDeep }}>147 pts</span>
         </p>
       </div>
+      <p style={{ margin: "16px 0 0", fontSize: 11, color: ds.inkFaint, textAlign: "center", lineHeight: 1.6 }}>
+        Full label guide:{" "}
+        <a
+          href="https://gssoc.girlscript.org/guidelines/labeling"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: ds.primaryDeep, fontWeight: 600, textDecoration: "none" }}
+        >
+          gssoc.girlscript.org/guidelines/labeling
+        </a>
+      </p>
     </div>
   );
 }

@@ -36,6 +36,8 @@ const TYPE_BONUSES: Record<string, number> = {
 
 const INVALID_LABELS = ["gssoc:invalid", "gssoc:spam", "gssoc:ai-slop"];
 const REQUIRED_LABEL = "gssoc:approved";
+const MAX_PR_POINTS = 175;
+const MIN_EXCEPTIONAL_REVIEW_LENGTH = 30;
 
 /* ── Rank thresholds ─────────────────────────────────────────── */
 
@@ -49,7 +51,15 @@ export function getRank(points: number): PRRank {
 
 /* ── Point calculation ───────────────────────────────────────── */
 
-function calcPoints(labelNames: string[]) {
+// When multiple difficulty/quality labels are applied, the lowest one wins —
+// this protects against label-stacking inflating a PR's score.
+function lowestLabel(labelNames: string[], scores: Record<string, number>): string | null {
+  const matched = labelNames.filter((l) => l in scores);
+  if (!matched.length) return null;
+  return matched.reduce((lowest, l) => (scores[l] < scores[lowest] ? l : lowest));
+}
+
+function calcPoints(labelNames: string[], opts?: { downgradeExceptional?: boolean }) {
   const hasInvalid = labelNames.some((l) => INVALID_LABELS.includes(l));
   const hasApproved = labelNames.includes(REQUIRED_LABEL);
 
@@ -66,17 +76,20 @@ function calcPoints(labelNames: string[]) {
     };
   }
 
-  const difficultyLabel = labelNames.find((l) => l in DIFFICULTY_SCORES) ?? null;
+  const difficultyLabel = lowestLabel(labelNames, DIFFICULTY_SCORES);
   const difficultyScore = difficultyLabel ? DIFFICULTY_SCORES[difficultyLabel] : 20;
 
-  const qualityLabel = labelNames.find((l) => l in QUALITY_MULTIPLIERS) ?? null;
-  const qualityMultiplier = qualityLabel ? QUALITY_MULTIPLIERS[qualityLabel] : 1;
+  const qualityLabel = lowestLabel(labelNames, QUALITY_MULTIPLIERS);
+  let qualityMultiplier = qualityLabel ? QUALITY_MULTIPLIERS[qualityLabel] : 1;
+  if (opts?.downgradeExceptional && qualityLabel === "quality:exceptional") {
+    qualityMultiplier = 1;
+  }
 
   const typeBonuses = labelNames.filter((l) => l in TYPE_BONUSES);
   const typeBonusTotal = typeBonuses.reduce((sum, l) => sum + TYPE_BONUSES[l], 0);
 
-  // Formula: 50 (base) + (difficulty × quality) + type_bonus
-  const points = Math.round(50 + difficultyScore * qualityMultiplier + typeBonusTotal);
+  // Formula: 50 (base) + (difficulty × quality) + type_bonus, capped per PR
+  const points = Math.min(Math.round(50 + difficultyScore * qualityMultiplier + typeBonusTotal), MAX_PR_POINTS);
 
   return {
     difficulty: difficultyLabel,
@@ -88,6 +101,19 @@ function calcPoints(labelNames: string[]) {
     points,
     isValid: true,
   };
+}
+
+// quality:exceptional requires a substantive review comment (>30 chars);
+// without one it falls back to the ×1.0 multiplier.
+async function hasSubstantiveReview(repo: string, prNumber: number): Promise<boolean> {
+  try {
+    const res = await ghFetch(`https://api.github.com/repos/${repo}/pulls/${prNumber}/reviews`);
+    if (!res.ok) return true; // can't verify — don't penalize on a failed lookup
+    const reviews = await res.json() as { body: string }[];
+    return reviews.some((r) => r.body && r.body.trim().length > MIN_EXCEPTIONAL_REVIEW_LENGTH);
+  } catch {
+    return true;
+  }
 }
 
 /* ── Streak calculation ──────────────────────────────────────── */
@@ -185,10 +211,10 @@ async function _buildPRTrackerData(username: string): Promise<PRTrackerData> {
     fetchGSSoCPRs(username),
   ]);
 
-  const allPRs: TrackedPR[] = rawPRs.filter((pr) => {
+  const allPRs: TrackedPR[] = await Promise.all(rawPRs.filter((pr) => {
     const { name: repo } = repoFromUrl(pr.repository_url);
     return GSSOC_REPO_SET.has(repo.toLowerCase());
-  }).map((pr) => {
+  }).map(async (pr) => {
     const labelNames = pr.labels.map((l) => l.name);
     const labelColors: Record<string, string> = {};
     pr.labels.forEach((l) => {
@@ -198,7 +224,11 @@ async function _buildPRTrackerData(username: string): Promise<PRTrackerData> {
     const isMerged = !!pr.pull_request?.merged_at;
     const { name: repo, url: repoUrl } = repoFromUrl(pr.repository_url);
 
-    const calc = calcPoints(labelNames);
+    let calc = calcPoints(labelNames);
+    if (calc.isValid && calc.quality === "quality:exceptional") {
+      const verified = await hasSubstantiveReview(repo, pr.number);
+      if (!verified) calc = calcPoints(labelNames, { downgradeExceptional: true });
+    }
 
     return {
       id: pr.id,
@@ -215,7 +245,7 @@ async function _buildPRTrackerData(username: string): Promise<PRTrackerData> {
       isGSSoC: labelNames.some((l) => l.startsWith("gssoc")),
       ...calc,
     };
-  });
+  }));
 
   const validPRs = allPRs.filter((pr) => pr.isValid && pr.state === "merged");
   const totalPoints = validPRs.reduce((s, pr) => s + pr.points, 0);

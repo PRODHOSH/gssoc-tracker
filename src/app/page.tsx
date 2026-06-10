@@ -42,11 +42,11 @@ export default function Home() {
   const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
-    if (!localStorage.getItem("gssoc_prcheck_v1")) setShowBanner(true);
+    if (!localStorage.getItem("gssoc_guidelines_v1")) setShowBanner(true);
   }, []);
 
   function dismissBanner() {
-    localStorage.setItem("gssoc_prcheck_v1", "1");
+    localStorage.setItem("gssoc_guidelines_v1", "1");
     setShowBanner(false);
   }
 
@@ -104,8 +104,10 @@ export default function Home() {
           display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
         }}>
           <span style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", lineHeight: 1 }}>
-            ✨ New — <a href="/pr-check" style={{ color: ds.primary, fontWeight: 600, textDecoration: "none" }}>PR Validator</a>
-            {" "}· paste any PR link and instantly check if it counts for GSSoC 2026
+            📋 GSSoC 2026 scoring guidelines have been updated —{" "}
+            <a href="https://gssoc.girlscript.org/guidelines/labeling" target="_blank" rel="noopener noreferrer" style={{ color: ds.primary, fontWeight: 600, textDecoration: "none" }}>
+              see the new label guide
+            </a>
           </span>
           <button
             onClick={dismissBanner}
