@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Info, X } from "lucide-react";
 import { ds, fontMono } from "@/lib/ds";
+import { getLabelChipColors } from "@/lib/labelColors";
 
 /* ── Data ── */
 const BASE   = [{ label: "gssoc:approved", value: "+50 pts", note: "every approved PR" }];
@@ -29,17 +30,8 @@ const TYPES  = [
   { label: "type:security",       value: "+20 pts" },
 ];
 
-/* ── Label chip colours ── */
-function chip(label: string): { bg: string; color: string; border: string } {
-  if (label.startsWith("gssoc"))   return { bg: "#f0fdf4", color: "#166534", border: "#86efac" };
-  if (label.startsWith("level"))   return { bg: "#fdf4ff", color: "#7e22ce", border: "#d8b4fe" };
-  if (label.startsWith("quality")) return { bg: "#eff6ff", color: "#1e40af", border: "#93c5fd" };
-  if (label.startsWith("type"))    return { bg: "#fff7ed", color: "#c2410c", border: "#fdba74" };
-  return { bg: ds.canvasSoft, color: ds.inkMute, border: ds.hairline };
-}
-
 function LabelChip({ label }: { label: string }) {
-  const c = chip(label);
+  const c = getLabelChipColors(label);
   return (
     <span style={{
       display: "inline-block",

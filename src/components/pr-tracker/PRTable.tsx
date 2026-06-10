@@ -1,7 +1,8 @@
 "use client";
 import { useState, useMemo } from "react";
-import { ExternalLink, ArrowUpDown, ArrowUp, ArrowDown, Search, Download } from "lucide-react";
+import { ExternalLink, ArrowUpDown, ArrowUp, ArrowDown, Search, Download, AlertTriangle } from "lucide-react";
 import { ds, fontMono } from "@/lib/ds";
+import { getLabelChipColors } from "@/lib/labelColors";
 import type { TrackedPR } from "@/types/pr-tracker";
 
 /* ── Pagination helper ───────────────────────────────────────── */
@@ -17,19 +18,54 @@ function pageItems(current: number, total: number): (number | null)[] {
 
 /* ── Label chip ─────────────────────────────────────────────── */
 function LabelChip({ name, color }: { name: string; color?: string }) {
-  const bg = color ? `${color}22` : `${ds.hairlineCool}`;
-  const border = color ?? ds.hairline;
-  const textColor = color ?? ds.inkMute;
+  const c = getLabelChipColors(name, color);
   return (
     <span style={{
       display: "inline-block",
       padding: "1px 7px",
       borderRadius: ds.rFull,
       fontSize: 11, fontWeight: 500,
-      background: bg, border: `1px solid ${border}`, color: textColor,
+      background: c.bg, border: `1px solid ${c.border}`, color: c.color,
       whiteSpace: "nowrap",
     }}>
       {name}
+    </span>
+  );
+}
+
+/* ── "Not counted" warning ──────────────────────────────────── */
+function notCountedInfo(pr: TrackedPR): { label: string; tooltip: string } | null {
+  if (!pr.isValid) {
+    return {
+      label: "Disqualified",
+      tooltip: "This PR has a gssoc:invalid, gssoc:spam, or gssoc:ai-slop label, so it scores 0 points. Ask a mentor to remove that label if it was applied by mistake.",
+    };
+  }
+  if (pr.state === "open") {
+    return {
+      label: "Pending merge",
+      tooltip: `Not counted yet — these ${pr.points} pts will be added to your total automatically once this PR is merged.`,
+    };
+  }
+  if (pr.state === "closed") {
+    return {
+      label: "Not merged",
+      tooltip: `This PR was closed without merging, so its ${pr.points} pts don't count toward your total. Get the PR reopened and merged for it to count.`,
+    };
+  }
+  return null;
+}
+
+function NotCountedBadge({ info }: { info: { label: string; tooltip: string } }) {
+  return (
+    <span title={info.tooltip} style={{
+      display: "inline-flex", alignItems: "center", gap: 3,
+      padding: "1px 6px", borderRadius: ds.rFull,
+      background: "rgba(220,38,38,0.07)", border: "1px solid rgba(220,38,38,0.2)",
+      color: "#dc2626", fontSize: 10, fontWeight: 600,
+      whiteSpace: "nowrap", cursor: "help",
+    }}>
+      <AlertTriangle size={10} /> {info.label}
     </span>
   );
 }
@@ -323,12 +359,18 @@ export function PRTable({ prs, username }: Props) {
 
                   {/* Points */}
                   <td style={{ padding: "10px 12px", borderRight: `1px solid ${ds.hairlineCool}`, whiteSpace: "nowrap", textAlign: "right" }}>
-                    <span style={{
-                      fontSize: 15, fontWeight: 700, fontFamily: fontMono,
-                      color: pr.points > 0 ? ds.primaryDeep : ds.inkFaint,
-                    }}>
-                      {pr.points > 0 ? pr.points : "—"}
-                    </span>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 3 }}>
+                      <span style={{
+                        fontSize: 15, fontWeight: 700, fontFamily: fontMono,
+                        color: pr.points > 0 ? ds.primaryDeep : ds.inkFaint,
+                      }}>
+                        {pr.points > 0 ? pr.points : "—"}
+                      </span>
+                      {(() => {
+                        const info = notCountedInfo(pr);
+                        return info ? <NotCountedBadge info={info} /> : null;
+                      })()}
+                    </div>
                   </td>
 
                   {/* Merged */}

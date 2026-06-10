@@ -7,6 +7,7 @@ import {
   GitMerge, GitPullRequest, Clock, Link2,
 } from "lucide-react";
 import { ds, fontMono } from "@/lib/ds";
+import { getLabelChipColors } from "@/lib/labelColors";
 
 /* ── Types ───────────────────────────────────────────────────── */
 
@@ -474,20 +475,23 @@ export function PrChecker() {
           {/* Labels */}
           {result.pr.labels.length > 0 && (
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {result.pr.labels.map((l) => (
-                <span
-                  key={l.name}
-                  style={{
-                    padding: "3px 10px", borderRadius: ds.rFull,
-                    fontSize: 11, fontWeight: 600,
-                    background: `${l.color}18`,
-                    border: `1px solid ${l.color}40`,
-                    color: l.color,
-                  }}
-                >
-                  {l.name}
-                </span>
-              ))}
+              {result.pr.labels.map((l) => {
+                const c = getLabelChipColors(l.name, l.color);
+                return (
+                  <span
+                    key={l.name}
+                    style={{
+                      padding: "3px 10px", borderRadius: ds.rFull,
+                      fontSize: 11, fontWeight: 600,
+                      background: c.bg,
+                      border: `1px solid ${c.border}`,
+                      color: c.color,
+                    }}
+                  >
+                    {l.name}
+                  </span>
+                );
+              })}
             </div>
           )}
         </div>

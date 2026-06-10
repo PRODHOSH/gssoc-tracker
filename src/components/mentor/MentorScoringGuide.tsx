@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Info, X } from "lucide-react";
 import { ds, fontMono } from "@/lib/ds";
+import { getLabelChipColors } from "@/lib/labelColors";
 
 const LEVELS = [
   { label: "level:beginner",     value: "10 pts" },
@@ -15,14 +16,8 @@ const QUALITY = [
   { label: "quality:exceptional", value: "+10 pts" },
 ];
 
-function chip(label: string): { bg: string; color: string; border: string } {
-  if (label.startsWith("level"))   return { bg: "#fdf4ff", color: "#7e22ce", border: "#d8b4fe" };
-  if (label.startsWith("quality")) return { bg: "#eff6ff", color: "#1e40af", border: "#93c5fd" };
-  return { bg: ds.canvasSoft, color: ds.inkMute, border: ds.hairline };
-}
-
 function LabelChip({ label }: { label: string }) {
-  const c = chip(label);
+  const c = getLabelChipColors(label);
   return (
     <span style={{ display: "inline-block", padding: "2px 9px", borderRadius: ds.rFull, fontSize: 12, fontWeight: 600, fontFamily: fontMono, background: c.bg, color: c.color, border: `1px solid ${c.border}` }}>
       {label}

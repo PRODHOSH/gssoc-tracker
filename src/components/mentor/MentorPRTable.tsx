@@ -2,6 +2,7 @@
 import { useState, useMemo } from "react";
 import { ExternalLink, ArrowUpDown, ArrowUp, ArrowDown, Search } from "lucide-react";
 import { ds, fontMono } from "@/lib/ds";
+import { getLabelChipColors } from "@/lib/labelColors";
 import type { MentorPR } from "@/lib/mentor-tracker";
 
 /* ── Pagination helper ───────────────────────────────────────── */
@@ -17,14 +18,12 @@ function pageItems(current: number, total: number): (number | null)[] {
 
 /* ── Label chip ─────────────────────────────────────────────── */
 function LabelChip({ name, color }: { name: string; color?: string }) {
-  const bg      = color ? `${color}22` : ds.hairlineCool;
-  const border  = color ?? ds.hairline;
-  const textCol = color ?? ds.inkMute;
+  const c = getLabelChipColors(name, color);
   return (
     <span style={{
       display: "inline-block", padding: "1px 7px", borderRadius: ds.rFull,
       fontSize: 11, fontWeight: 500,
-      background: bg, border: `1px solid ${border}`, color: textCol,
+      background: c.bg, border: `1px solid ${c.border}`, color: c.color,
       whiteSpace: "nowrap",
     }}>
       {name}
