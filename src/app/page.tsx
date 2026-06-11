@@ -2,18 +2,24 @@
 import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, AlertCircle, Star, GitPullRequest, Users, ArrowLeft } from "lucide-react";
+import { Loader2, AlertCircle, GitPullRequest, Users, ArrowLeft, Award, Search } from "lucide-react";
 import { ds, fontMono } from "@/lib/ds";
-import { GitHubIcon } from "@/components/icons";
-import { SubscribeButton } from "@/components/SubscribeModal";
 import { HomePointsGuide } from "@/components/HomePointsGuide";
-import Image from "next/image";
-
-const REPO_URL = "https://github.com/PRODHOSH/gssoc-tracker";
 
 type Role = "contributor" | "mentor";
 
-const ROLES: { id: Role; icon: React.ReactNode; label: string; desc: string; border: string; bg: string; hoverBorder: string; hoverBg: string }[] = [
+interface RoleConfig {
+  id: Role;
+  icon: React.ReactNode;
+  label: string;
+  desc: string;
+  border: string;
+  bg: string;
+  hoverBorder: string;
+  hoverBg: string;
+}
+
+const ROLES: RoleConfig[] = [
   {
     id: "contributor",
     icon: <GitPullRequest size={20} color={ds.primary} />,
@@ -31,6 +37,136 @@ const ROLES: { id: Role; icon: React.ReactNode; label: string; desc: string; bor
     hoverBorder: "rgba(251,191,36,0.5)", hoverBg: "rgba(251,191,36,0.1)",
   },
 ];
+
+function EmbeddedGlobalRankCard() {
+  const [username, setUsername] = useState("");
+  const [rankInfo, setRankInfo] = useState<{ rank: number; points: number } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleSearch(e: React.FormEvent) {
+    e.preventDefault();
+    const target = username.trim().replace(/^@/, "");
+    if (!target) return;
+
+    setLoading(true);
+    setError("");
+    setRankInfo(null);
+
+    try {
+      const res = await fetch(`/data/main-digest.json`);
+      if (!res.ok) throw new Error();
+      const list = await res.json();
+      const found = list.find((u: any) => u.username?.toLowerCase() === target.toLowerCase());
+      
+      if (found) {
+        setRankInfo({ rank: found.rank || 0, points: found.points || 0 });
+      } else {
+        setError("User not found in recent digest sync.");
+      }
+    } catch {
+      setError("Unable to read leaderboard metrics.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div style={{
+      background: "rgba(255,255,255,0.02)",
+      border: "1px solid rgba(255,255,255,0.06)",
+      borderRadius: 12,
+      padding: "16px",
+      marginTop: 16,
+      textAlign: "left"
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
+        <Award size={16} color={ds.primary} />
+        <span style={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>Check Global Rank</span>
+      </div>
+
+      <form onSubmit={handleSearch} style={{ display: "flex", gap: 8 }}>
+        <input
+          type="text"
+          placeholder="GitHub username..."
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          style={{
+            flex: 1,
+            background: "rgba(0,0,0,0.2)",
+            border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: 6,
+            padding: "6px 12px",
+            color: "#fff",
+            fontSize: 13,
+            outline: "none"
+          }}
+        />
+        <button type="submit" disabled={loading} style={{
+          background: ds.primary,
+          border: "none",
+          borderRadius: 6,
+          padding: "0 12px",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }}>
+          {loading ? <Loader2 size={14} className="animate-spin" color="#000" /> : <Search size={14} color="#000" />}
+        </button>
+      </form>
+
+      {rankInfo && (
+        <div style={{ marginTop: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>RANK</div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: ds.primary, fontFamily: fontMono }}>#{rankInfo.rank}</div>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>POINTS</div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: "#fff" }}>{rankInfo.points} pts</div>
+          </div>
+        </div>
+      )}
+
+      {error && <p style={{ color: "#ef4444", fontSize: 12, marginTop: 8, margin: 0 }}>{error}</p>}
+    </div>
+  );
+}
+
+interface RoleCardProps {
+  role: RoleConfig;
+  onSelect: (id: Role) => void;
+}
+
+function RoleCard({ role, onSelect }: RoleCardProps) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      onClick={() => onSelect(role.id)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        padding: "16px 20px",
+        borderRadius: 12,
+        cursor: "pointer",
+        textAlign: "left",
+        border: `1px solid ${hovered ? role.hoverBorder : role.border}`,
+        background: hovered ? role.hoverBg : role.bg,
+        transition: "all 0.15s ease",
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 16,
+      }}
+    >
+      <div style={{ marginTop: 2 }}>{role.icon}</div>
+      <div>
+        <h3 style={{ margin: "0 0 4px", fontSize: 15, fontWeight: 600, color: "#fff" }}>{role.label}</h3>
+        <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.4)", lineHeight: 1.4 }}>{role.desc}</p>
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   const router = useRouter();
@@ -71,7 +207,7 @@ export default function Home() {
     setState("loading");
 
     try {
-      const res = await fetch(`https://api.github.com/users/${encodeURIComponent(raw)}`);
+      const res = await fetch(`https://github.com{encodeURIComponent(raw)}`);
       if (res.status === 404) { setErrMsg("GitHub user not found"); setState("error"); return; }
       if (!res.ok) { setErrMsg("Couldn't reach GitHub. Try again."); setState("error"); return; }
       router.push(role === "contributor" ? `/pr-tracker/${encodeURIComponent(raw)}` : `/mentor/${encodeURIComponent(raw)}`);
@@ -94,7 +230,6 @@ export default function Home() {
       position: "relative",
     }}>
 
-      {/* What's new banner */}
       {showBanner && (
         <div style={{
           position: "fixed", top: 0, left: 0, right: 0, zIndex: 50,
@@ -112,247 +247,137 @@ export default function Home() {
           <button
             onClick={dismissBanner}
             style={{
-              background: "none", border: "none", cursor: "pointer",
-              color: "rgba(255,255,255,0.3)", fontSize: 16, lineHeight: 1,
-              padding: "0 4px", flexShrink: 0,
+              background: "transparent",
+              border: "none",
+              color: "rgba(255,255,255,0.4)",
+              cursor: "pointer",
+              fontSize: 14,
             }}
           >
             ×
           </button>
         </div>
       )}
-      <motion.div
-        initial={{ opacity: 0, y: -16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35 }}
-        style={{ width: "100%", maxWidth: 480, textAlign: "center" }}
-      >
-        {/* Icon */}
-        <div style={{
-          display: "inline-flex", alignItems: "center", justifyContent: "center",
-          width: 52, height: 52, borderRadius: 14,
-          background: "rgba(62,207,142,0.1)", border: "1px solid rgba(62,207,142,0.2)",
-          marginBottom: 24,
-        }}>
-          <GitPullRequest size={24} color={ds.primary} />
-        </div>
 
-        <h1 style={{
-          margin: "0 0 8px",
-          fontSize: "clamp(26px, 5vw, 36px)", fontWeight: 700,
-          color: "#fff", letterSpacing: "-0.03em", lineHeight: 1.1,
-        }}>
+      <div style={{ maxWidth: 440, width: "100%", textAlign: "center" }}>
+        <h1 style={{ fontSize: 28, fontWeight: 800, color: "#fff", marginBottom: 8 }}>
           GSSoC Tracker
         </h1>
-
-        <p style={{ margin: "0 0 36px", fontSize: 15, color: "rgba(255,255,255,0.35)", lineHeight: 1.6 }}>
-          {step === "role" ? "Who are you in GSSoC 2026?" : "Enter your details to get started"}
+        <p style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", marginBottom: 32 }}>
+          Monitor your contributions and metrics live
         </p>
 
-        {/* Step content */}
         <AnimatePresence mode="wait">
-          {step === "role" && (
+          {step === "role" ? (
             <motion.div
               key="role"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.2 }}
-              style={{ display: "flex", flexDirection: "column", gap: 10 }}
+              exit={{ opacity: 0, y: -10 }}
+              style={{ display: "flex", flexDirection: "column", gap: 12 }}
             >
               {ROLES.map((r) => (
                 <RoleCard key={r.id} role={r} onSelect={selectRole} />
               ))}
-              <div style={{ marginTop: 8, display: "flex", justifyContent: "center" }}>
-                <HomePointsGuide />
-              </div>
-              <div style={{ marginTop: 6, textAlign: "center" }}>
-                <a
-                  href="/pr-check"
-                  style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", textDecoration: "none", transition: "color 0.13s" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = ds.primary)}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.3)")}
-                >
-                  or validate a specific PR →
-                </a>
-              </div>
+              
+              <EmbeddedGlobalRankCard />
             </motion.div>
-          )}
-
-          {step === "input" && (
+          ) : (
             <motion.div
               key="input"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.2 }}
+              exit={{ opacity: 0, y: -10 }}
             >
-              {/* Role pill + back */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-                <button
-                  onClick={goBack}
-                  style={{
-                    display: "inline-flex", alignItems: "center", gap: 5,
-                    background: "none", border: "none", cursor: "pointer",
-                    color: "rgba(255,255,255,0.35)", fontSize: 13, padding: "4px 0",
-                  }}
-                >
-                  <ArrowLeft size={13} /> Back
-                </button>
-                {activeRole && (
-                  <span style={{
-                    display: "inline-flex", alignItems: "center", gap: 6,
-                    padding: "4px 12px", borderRadius: 9999,
-                    border: `1px solid ${activeRole.border}`,
-                    background: activeRole.bg,
-                    fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.7)",
-                  }}>
-                    {activeRole.icon && <span style={{ transform: "scale(0.75)", display: "inline-flex" }}>{activeRole.icon}</span>}
-                    {activeRole.label}
-                  </span>
-                )}
-              </div>
+              <button
+                onClick={goBack}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "rgba(255,255,255,0.4)",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  fontSize: 13,
+                  marginBottom: 16,
+                  padding: 0,
+                }}
+              >
+                <ArrowLeft size={14} /> Back
+              </button>
 
-              <form onSubmit={submit} style={{ display: "flex", gap: 8 }}>
-                <div style={{ position: "relative", flex: 1 }}>
-                  <div style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>
-                    <GitHubIcon width={14} height={14} style={{ color: "rgba(255,255,255,0.25)" }} />
-                  </div>
+              <form onSubmit={submit} style={{ textAlign: "left" }}>
+                <label style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", marginBottom: 8, display: "block" }}>
+                  Enter your GitHub username
+                </label>
+                <div style={{ display: "flex", gap: 8 }}>
                   <input
                     type="text"
                     value={input}
-                    onChange={(e) => { setInput(e.target.value); setState("idle"); setErrMsg(""); }}
-                    placeholder="GitHub username…"
-                    autoFocus
-                    autoComplete="off"
-                    suppressHydrationWarning
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="e.g. nancy-verma780"
+                    disabled={state === "loading"}
                     style={{
-                      width: "100%", height: 48,
-                      paddingLeft: 38, paddingRight: 14,
-                      borderRadius: 10,
-                      border: `1.5px solid ${state === "error" ? "rgba(248,113,113,0.5)" : "rgba(255,255,255,0.08)"}`,
-                      background: "rgba(255,255,255,0.04)",
-                      color: "#fff", fontSize: 15,
-                      fontFamily: fontMono, outline: "none",
-                      transition: "border-color 0.15s",
-                      boxSizing: "border-box",
+                      flex: 1,
+                      background: "rgba(0,0,0,0.3)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      borderRadius: 8,
+                      padding: "10px 14px",
+                      color: "#fff",
+                      fontSize: 14,
+                      outline: "none",
                     }}
-                    onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(62,207,142,0.45)")}
-                    onBlur={(e) => (e.currentTarget.style.borderColor = state === "error" ? "rgba(248,113,113,0.5)" : "rgba(255,255,255,0.08)")}
                   />
+                  <button
+                    type="submit"
+                    disabled={state === "loading"}
+                    style={{
+                      background: activeRole?.id === "contributor" ? ds.primary : "#fbbf24",
+                      color: "#000",
+                      border: "none",
+                      borderRadius: 8,
+                      padding: "0 20px",
+                      fontWeight: 600,
+                      fontSize: 14,
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                  >
+                    {state === "loading" && <Loader2 size={16} className="animate-spin" />}
+                    Track
+                  </button>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={state === "loading" || !input.trim()}
-                  style={{
-                    height: 48, padding: "0 22px",
-                    borderRadius: 10, border: "none",
-                    background: state === "loading" ? "rgba(62,207,142,0.55)" : ds.primary,
-                    color: ds.onPrimary, fontSize: 14, fontWeight: 600,
-                    cursor: state === "loading" || !input.trim() ? "not-allowed" : "pointer",
-                    display: "flex", alignItems: "center", gap: 6, flexShrink: 0,
-                    transition: "background 0.13s",
-                    opacity: !input.trim() ? 0.5 : 1,
-                  }}
-                >
-                  {state === "loading"
-                    ? <><Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> Loading…</>
-                    : "Track →"}
-                </button>
+                {state === "error" && (
+                  <div style={{
+                    marginTop: 12,
+                    background: "rgba(239,68,68,0.05)",
+                    border: "1px solid rgba(239,68,68,0.15)",
+                    borderRadius: 8,
+                    padding: "10px 12px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    color: "#ef4444",
+                    fontSize: 13,
+                  }}>
+                    <AlertCircle size={16} />
+                    <span>{errMsg}</span>
+                  </div>
+                )}
               </form>
-
-              {state === "error" && (
-                <motion.div
-                  initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-                  style={{ display: "flex", alignItems: "center", gap: 6, justifyContent: "center", marginTop: 10, fontSize: 13, color: "#f87171" }}
-                >
-                  <AlertCircle size={13} /> {errMsg}
-                </motion.div>
-              )}
-
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.div>
 
-      {/* Bottom bar */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3, duration: 0.4 }}
-        style={{
-          position: "fixed", bottom: 0, left: 0, right: 0,
-          display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
-          padding: "14px 24px 18px",
-          background: "linear-gradient(to top, rgba(23,23,23,0.95) 70%, transparent)",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
-          <a
-            href="https://github.com/PRODHOSH"
-            target="_blank" rel="noopener noreferrer"
-            style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none", padding: "6px 12px", borderRadius: ds.rFull, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)" }}
-          >
-            <Image src="https://avatars.githubusercontent.com/PRODHOSH" alt="PRODHOSH" width={22} height={22} unoptimized style={{ borderRadius: "50%", display: "block" }} />
-            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.35)" }}>
-              Built by <span style={{ color: "rgba(255,255,255,0.6)", fontWeight: 600 }}>@PRODHOSH</span>
-            </span>
-          </a>
-
-          <a
-            href={REPO_URL} target="_blank" rel="noopener noreferrer"
-            style={{ display: "flex", alignItems: "center", gap: 6, textDecoration: "none", padding: "6px 14px", borderRadius: ds.rFull, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.04)", fontSize: 12, fontWeight: 500, color: "rgba(255,255,255,0.45)", transition: "all 0.15s" }}
-            onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(202,138,4,0.5)"; e.currentTarget.style.color = "#fbbf24"; e.currentTarget.style.background = "rgba(202,138,4,0.06)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "rgba(255,255,255,0.45)"; e.currentTarget.style.background = "rgba(255,255,255,0.04)"; }}
-          >
-            <Star size={13} /> Star on GitHub
-          </a>
-
-          <SubscribeButton />
+        <div style={{ marginTop: 48 }}>
+          <HomePointsGuide />
         </div>
-
-        <p style={{ margin: 0, fontSize: 11, color: "rgba(255,255,255,0.2)", textAlign: "center" }}>
-          Not affiliated with GirlScript Summer of Code or GirlScript Foundation ·{" "}
-          <a href="/terms" style={{ color: "rgba(255,255,255,0.3)", textDecoration: "underline" }}>Terms &amp; Privacy</a>
-        </p>
-      </motion.div>
-
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
     </div>
   );
 }
 
-function RoleCard({ role, onSelect }: { role: typeof ROLES[number]; onSelect: (r: Role) => void }) {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <button
-      onClick={() => onSelect(role.id)}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        display: "flex", alignItems: "flex-start", gap: 14,
-        padding: "16px 18px", borderRadius: 12, cursor: "pointer",
-        background: hovered ? role.hoverBg : role.bg,
-        border: `1.5px solid ${hovered ? role.hoverBorder : role.border}`,
-        textAlign: "left", transition: "all 0.15s", width: "100%",
-      }}
-    >
-      <div style={{
-        width: 38, height: 38, borderRadius: 10,
-        background: hovered ? role.hoverBg : role.bg,
-        border: `1px solid ${role.border}`,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        flexShrink: 0, marginTop: 1,
-        transition: "all 0.15s",
-      }}>
-        {role.icon}
-      </div>
-      <div>
-        <div style={{ fontSize: 15, fontWeight: 600, color: "#fff", marginBottom: 3 }}>{role.label}</div>
-        <div style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", lineHeight: 1.45 }}>{role.desc}</div>
-      </div>
-      <div style={{ marginLeft: "auto", alignSelf: "center", color: "rgba(255,255,255,0.2)", fontSize: 18, flexShrink: 0 }}>›</div>
-    </button>
-  );
-}
