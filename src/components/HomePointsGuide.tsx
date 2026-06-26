@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Info, X, GitPullRequest, Users } from "lucide-react";
+import { Info, X, GitPullRequest, Users, FolderGit2 } from "lucide-react";
 import { ds, fontMono } from "@/lib/ds";
 import { getLabelChipColors } from "@/lib/labelColors";
 
@@ -158,13 +158,57 @@ function MentorTab() {
   );
 }
 
+function ProjectAdminTab() {
+  const adminOngoing = [
+    { label: "Merge GSSoC contributor PR", value: "+15 pts" },
+    { label: "Label difficulty AND type", value: "+10 pts" },
+    { label: "Label difficulty only", value: "+5 pts" },
+    { label: "Open issue (beginner friendly)", value: "+8 pts" },
+    { label: "Open issue (any other)", value: "+3 pts" },
+  ];
+  const adminBoost = [
+    { label: "Avg Resolution Time ≤ 2 days", value: "+60 pts" },
+    { label: "Avg Resolution Time ≤ 5 days", value: "+40 pts" },
+    { label: "Avg Resolution Time ≤ 10 days", value: "+20 pts" },
+  ];
+
+  return (
+    <div style={{ padding: "20px", overflowY: "auto" }}>
+      <p style={{ margin: "0 0 10px", fontSize: 10, fontWeight: 800, color: ds.inkMute2, letterSpacing: "0.1em", textTransform: "uppercase" }}>Ongoing per Action</p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
+        {adminOngoing.map((row) => (
+          <div key={row.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+            <span style={{ fontSize: 13, color: ds.ink }}>{row.label}</span>
+            <span style={{ fontSize: 13, fontWeight: 700, fontFamily: fontMono, color: "#818cf8" }}>{row.value}</span>
+          </div>
+        ))}
+      </div>
+
+      <p style={{ margin: "0 0 10px", fontSize: 10, fontWeight: 800, color: ds.inkMute2, letterSpacing: "0.1em", textTransform: "uppercase" }}>Issue Resolution Boost (Min 2 closed)</p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
+        {adminBoost.map((row) => (
+          <div key={row.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+            <span style={{ fontSize: 13, color: ds.ink }}>{row.label}</span>
+            <span style={{ fontSize: 13, fontWeight: 700, fontFamily: fontMono, color: "#818cf8" }}>{row.value}</span>
+          </div>
+        ))}
+      </div>
+
+      <p style={{ margin: "16px 0 0", fontSize: 11, color: ds.inkFaint, lineHeight: 1.6 }}>
+        * Note: One-time Base Application Form points are not included.
+      </p>
+    </div>
+  );
+}
+
 /* ── Modal ───────────────────────────────────────────────────── */
 function Modal({ onClose }: { onClose: () => void }) {
-  const [tab, setTab] = useState<"contributor" | "mentor">("contributor");
+  const [tab, setTab] = useState<"contributor" | "mentor" | "project-admin">("contributor");
 
   const tabs = [
     { id: "contributor" as const, label: "Contributor", icon: <GitPullRequest size={12} />, accent: ds.primaryDeep, activeBg: "rgba(62,207,142,0.08)", activeBorder: ds.primaryDeep },
     { id: "mentor"      as const, label: "Mentor",      icon: <Users size={12} />,          accent: "#ca8a04",      activeBg: "rgba(251,191,36,0.08)", activeBorder: "#ca8a04"      },
+    { id: "project-admin" as const, label: "Project Admin", icon: <FolderGit2 size={12} />,   accent: "#818cf8",      activeBg: "rgba(129,140,248,0.08)", activeBorder: "#818cf8"      },
   ];
 
   return createPortal(
@@ -214,7 +258,7 @@ function Modal({ onClose }: { onClose: () => void }) {
 
         {/* Tab body */}
         <div style={{ overflowY: "auto" }}>
-          {tab === "contributor" ? <ContributorTab /> : <MentorTab />}
+          {tab === "contributor" ? <ContributorTab /> : tab === "mentor" ? <MentorTab /> : <ProjectAdminTab />}
         </div>
       </div>
 

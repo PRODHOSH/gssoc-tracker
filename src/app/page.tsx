@@ -2,7 +2,7 @@
 import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, AlertCircle, Star, GitPullRequest, Users, ArrowLeft } from "lucide-react";
+import { Loader2, AlertCircle, Star, GitPullRequest, Users, ArrowLeft, FolderGit2 } from "lucide-react";
 import { ds, fontMono } from "@/lib/ds";
 import { GitHubIcon } from "@/components/icons";
 import { SubscribeButton } from "@/components/SubscribeModal";
@@ -11,7 +11,7 @@ import Image from "next/image";
 
 const REPO_URL = "https://github.com/PRODHOSH/gssoc-tracker";
 
-type Role = "contributor" | "mentor";
+type Role = "contributor" | "mentor" | "project-admin";
 
 const ROLES: { id: Role; icon: React.ReactNode; label: string; desc: string; border: string; bg: string; hoverBorder: string; hoverBg: string }[] = [
   {
@@ -29,6 +29,14 @@ const ROLES: { id: Role; icon: React.ReactNode; label: string; desc: string; bor
     desc: "Track PRs you've reviewed as a GSSoC mentor",
     border: "rgba(251,191,36,0.2)", bg: "rgba(251,191,36,0.05)",
     hoverBorder: "rgba(251,191,36,0.5)", hoverBg: "rgba(251,191,36,0.1)",
+  },
+  {
+    id: "project-admin",
+    icon: <FolderGit2 size={20} color="#818cf8" />,
+    label: "Project Admin",
+    desc: "Track issues, PRs & admin activity for your GSSoC project",
+    border: "rgba(129,140,248,0.2)", bg: "rgba(129,140,248,0.05)",
+    hoverBorder: "rgba(129,140,248,0.5)", hoverBg: "rgba(129,140,248,0.1)",
   },
 ];
 
@@ -74,7 +82,13 @@ export default function Home() {
       const res = await fetch(`https://api.github.com/users/${encodeURIComponent(raw)}`);
       if (res.status === 404) { setErrMsg("GitHub user not found"); setState("error"); return; }
       if (!res.ok) { setErrMsg("Couldn't reach GitHub. Try again."); setState("error"); return; }
-      router.push(role === "contributor" ? `/pr-tracker/${encodeURIComponent(raw)}` : `/mentor/${encodeURIComponent(raw)}`);
+      if (role === "contributor") {
+        router.push(`/pr-tracker/${encodeURIComponent(raw)}`);
+      } else if (role === "mentor") {
+        router.push(`/mentor/${encodeURIComponent(raw)}`);
+      } else {
+        router.push(`/project-admin/${encodeURIComponent(raw)}`);
+      }
     } catch {
       setErrMsg("Couldn't reach the API. Try again.");
       setState("error");

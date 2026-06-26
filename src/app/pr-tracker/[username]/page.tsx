@@ -12,6 +12,7 @@ import type { PRTrackerData } from "@/types/pr-tracker";
 import type { Metadata } from "next";
 import { NpsFeedback } from "@/components/NpsFeedback";
 import { StarNudge } from "@/components/StarNudge";
+import { GSSOC_REPO_SET } from "@/data/gssoc-repos";
 
 export const dynamic = "force-dynamic";
 
@@ -80,6 +81,10 @@ export default async function PRTrackerDashboard({ params }: Props) {
     month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
     timeZone: "Asia/Kolkata",
   });
+
+  const isProjectAdmin = Array.from(GSSOC_REPO_SET).some(
+    (repoKey) => repoKey.split("/")[0] === data.user.login.toLowerCase()
+  );
 
   return (
     <div style={{ minHeight: "100vh", background: "#f5f5f5", fontFamily: "var(--font-sans)" }}>
@@ -173,6 +178,45 @@ export default async function PRTrackerDashboard({ params }: Props) {
 
         {/* Profile */}
         <GitHubProfileCard user={data.user} rank={data.rank} totalPoints={data.totalPoints} />
+
+        {/* Dual-role notice */}
+        {isProjectAdmin && (
+          <div style={{
+            background: "linear-gradient(90deg, rgba(129,140,248,0.04) 0%, rgba(62,207,142,0.04) 100%)",
+            border: `1px solid ${ds.hairlineCool}`,
+            borderRadius: ds.rLg,
+            padding: "14px 20px",
+            marginBottom: 20,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 12
+          }}>
+            <div>
+              <span style={{ fontSize: 13, fontWeight: 600, color: ds.ink }}>Also a Project Admin?</span>
+              <p style={{ margin: "2px 0 0", fontSize: 12, color: ds.inkMute }}>
+                Track your GSSoC 2026 points from merging, labeling and managing issues on your project admin dashboard.
+              </p>
+            </div>
+            <Link 
+              href={`/project-admin/${encodeURIComponent(data.user.login)}`}
+              style={{
+                padding: "6px 14px",
+                borderRadius: ds.rSm,
+                border: "1.5px solid #818cf8",
+                background: "transparent",
+                color: "#4f46e5",
+                fontSize: 12,
+                fontWeight: 600,
+                textDecoration: "none",
+                transition: "all 0.15s"
+              }}
+            >
+              Project Admin Dashboard →
+            </Link>
+          </div>
+        )}
 
         {/* Stats */}
         <StatsGrid data={data} />
