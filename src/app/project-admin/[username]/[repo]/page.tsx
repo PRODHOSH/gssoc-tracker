@@ -128,11 +128,11 @@ export default async function ProjectAdminPage({ params }: Props) {
 
               {/* Points box */}
               <div style={{ padding: "10px 18px", background: "rgba(99,102,241,0.06)", border: "1.5px solid rgba(99,102,241,0.2)", borderRadius: ds.rLg, textAlign: "center", minWidth: 120, flexShrink: 0 }}>
-                <p style={{ margin: "0 0 1px", fontSize: 10, fontWeight: 700, color: ds.inkMute2, letterSpacing: "0.1em", textTransform: "uppercase" }}>Est. Points</p>
+                <p style={{ margin: "0 0 1px", fontSize: 10, fontWeight: 700, color: ds.inkMute2, letterSpacing: "0.1em", textTransform: "uppercase" }}>Admin Points</p>
                 <p style={{ margin: 0, fontSize: 28, fontWeight: 800, color: "#4f46e5", fontFamily: fontMono, lineHeight: 1.1, letterSpacing: "-0.02em" }}>
-                  ~{adminScore.total.toLocaleString()}
+                  {adminScore.total.toLocaleString()}
                 </p>
-                <p style={{ margin: "3px 0 0", fontSize: 10, color: ds.inkMute2 }}>approx. by @{owner}</p>
+                <p style={{ margin: "3px 0 0", fontSize: 10, color: ds.inkMute2 }}>earned by @{owner}</p>
               </div>
             </div>
 
@@ -161,10 +161,10 @@ export default async function ProjectAdminPage({ params }: Props) {
 
         {/* Stats Grid */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 10, marginBottom: 16 }}>
-          <StatCard icon={<Trophy size={14} />} label="Est. Points" value={`~${adminScore.total}`} sub="approx. earned" accent="#4f46e5" accentBg="rgba(99,102,241,0.07)" />
-          <StatCard icon={<GitMerge size={14} />} label="Merged PRs" value={adminScore.mergedPRsCount} sub="~15 pts each" accent={ds.primaryDeep} accentBg="rgba(62,207,142,0.07)" />
-          <StatCard icon={<Tag size={14} />} label="Labeled Issues" value={adminScore.labeledIssuesFullCount + adminScore.labeledIssuesDiffCount} sub="~10 / ~5 pts each" accent="#f59e0b" accentBg="rgba(245,158,11,0.07)" />
-          <StatCard icon={<FolderGit2 size={14} />} label="Opened Issues" value={adminScore.openedIssuesBeginnerCount + adminScore.openedIssuesOtherCount} sub={`by @${owner} (~8 / ~3)`} accent="#8b5cf6" accentBg="rgba(139,92,246,0.07)" />
+          <StatCard icon={<Trophy size={14} />} label="Total Points" value={adminScore.total} sub="points earned" accent="#4f46e5" accentBg="rgba(99,102,241,0.07)" />
+          <StatCard icon={<GitMerge size={14} />} label="Merged PRs" value={adminScore.mergedPRsCount} sub="+15 pts each" accent={ds.primaryDeep} accentBg="rgba(62,207,142,0.07)" />
+          <StatCard icon={<Tag size={14} />} label="Labeled Issues" value={adminScore.labeledIssuesFullCount + adminScore.labeledIssuesDiffCount} sub="+10 / +5 pts each" accent="#f59e0b" accentBg="rgba(245,158,11,0.07)" />
+          <StatCard icon={<FolderGit2 size={14} />} label="Opened Issues" value={adminScore.openedIssuesBeginnerCount + adminScore.openedIssuesOtherCount} sub={`by @${owner} (+8 / +3)`} accent="#8b5cf6" accentBg="rgba(139,92,246,0.07)" />
         </div>
 
         {/* Empty state */}

@@ -33,8 +33,8 @@ async function ghFetch(url: string) {
   return fetch(url, { headers, cache: "no-store" });
 }
 
-async function fetchRepoPRs(owner: string, repo: string, adminUsername: string): Promise<any[]> {
-  const q = `label:"gssoc:approved" repo:${owner}/${repo} type:pr is:merged merged-by:${adminUsername}`;
+async function fetchRepoPRs(owner: string, repo: string): Promise<any[]> {
+  const q = `label:"gssoc:approved" repo:${owner}/${repo} type:pr is:merged`;
   const url = `https://api.github.com/search/issues?q=${encodeURIComponent(q)}&per_page=100&sort=created&order=desc`;
   const res = await ghFetch(url);
   if (res.status === 403 || res.status === 429) throw new Error("RATE_LIMITED");
@@ -97,7 +97,7 @@ async function fetchRepoIssues(owner: string, repo: string): Promise<any[]> {
 
 async function _buildAdminScore(owner: string, repo: string, adminUsername: string): Promise<AdminScoreBreakdown> {
   const [prs, issues] = await Promise.all([
-    fetchRepoPRs(owner, repo, adminUsername),
+    fetchRepoPRs(owner, repo),
     fetchRepoIssues(owner, repo),
   ]);
 

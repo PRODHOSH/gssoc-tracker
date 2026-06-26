@@ -163,7 +163,7 @@ export default async function ProjectAdminDashboard({ params }: Props) {
             pillBorder: ROLE_STYLE["project-admin"].border,
             glow: "rgba(99,102,241,0.12)"
           }}
-          pointsLabel="Est. Points"
+          pointsLabel="Admin Points"
           pointsColor="#4f46e5"
         />
 
@@ -228,7 +228,7 @@ export default async function ProjectAdminDashboard({ params }: Props) {
 
         {/* Aggregate Stats Grid */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 12, marginBottom: 24 }}>
-          <StatCard icon={<Trophy size={16} />} label="Est. Activity Points" value={totalPoints} sub="Sum of all repos (approx.)" color="#4f46e5" bg="rgba(99,102,241,0.06)" />
+          <StatCard icon={<Trophy size={16} />} label="Total Admin Points" value={totalPoints} sub="Sum of all repos" color="#4f46e5" bg="rgba(99,102,241,0.06)" />
           <StatCard icon={<BookOpen size={16} />} label="Registered Projects" value={userRepos.length} sub="Matching repos" color="#818cf8" bg="rgba(129,140,248,0.06)" />
           <StatCard icon={<GitMerge size={16} />} label="Merged GSSoC PRs" value={totalMerged} sub="Across all projects" color={ds.primaryDeep} bg="rgba(62,207,142,0.06)" />
           <StatCard icon={<Tag size={16} />} label="Issues Labeled" value={totalLabeled} sub="Difficulty/Type tagged" color="#f59e0b" bg="rgba(245,158,11,0.06)" />
