@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Clock, AlertTriangle, RefreshCw, FolderGit2, GitMerge, Tag, Trophy, BookOpen, ExternalLink } from "lucide-react";
+import { ArrowLeft, Clock, AlertTriangle, Info, RefreshCw, FolderGit2, GitMerge, Tag, Trophy, BookOpen, ExternalLink } from "lucide-react";
 import { ds, fontMono, ROLE_STYLE } from "@/lib/ds";
 import { fetchGitHubUser } from "@/lib/pr-tracker";
 import { GSSOC_REPO_SET } from "@/data/gssoc-repos";
@@ -20,14 +20,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const decoded = decodeURIComponent(username);
   try {
     const user = await fetchGitHubUser(decoded);
-    const title = `@${user.login} — Project Admin · GSSoC 2026`;
-    const description = `View GSSoC 2026 Project Admin points and repository tracking for @${user.login}.`;
+    const title = `@${user.login} — PA Activity Tracker · GSSoC 2026`;
+    const description = `View estimated GSSoC 2026 Project Admin activity tracking for @${user.login}. Points are approximate.`;
     return {
       title,
       description,
     };
   } catch {
-    return { title: "Project Admin | GSSoC Tracker" };
+    return { title: "PA Activity Tracker | GSSoC Tracker" };
   }
 }
 
@@ -115,7 +115,7 @@ export default async function ProjectAdminDashboard({ params }: Props) {
               <FolderGit2 size={12} color="#818cf8" />
             </div>
             <span style={{ fontSize: 14, fontWeight: 700, color: ds.ink, letterSpacing: "-0.01em" }}>
-              Project Admin Tracker
+              PA Activity Tracker
             </span>
             <span style={{
               fontSize: 12, color: ds.inkMute2, fontFamily: fontMono,
@@ -163,7 +163,7 @@ export default async function ProjectAdminDashboard({ params }: Props) {
             pillBorder: ROLE_STYLE["project-admin"].border,
             glow: "rgba(99,102,241,0.12)"
           }}
-          pointsLabel="Admin Points"
+          pointsLabel="Est. Points"
           pointsColor="#4f46e5"
         />
 
@@ -204,9 +204,31 @@ export default async function ProjectAdminDashboard({ params }: Props) {
           </Link>
         </div>
 
+        {/* Disclaimer Banner */}
+        <div style={{
+          background: "rgba(245,158,11,0.06)",
+          border: "1px solid rgba(245,158,11,0.3)",
+          borderRadius: ds.rLg,
+          padding: "12px 18px",
+          marginBottom: 16,
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 10,
+        }}>
+          <Info size={16} color="#f59e0b" style={{ flexShrink: 0, marginTop: 2 }} />
+          <div>
+            <p style={{ margin: "0 0 3px", fontSize: 13, fontWeight: 600, color: "#92400e" }}>
+              Estimated Points — Not Official
+            </p>
+            <p style={{ margin: 0, fontSize: 12, color: "#a16207", lineHeight: 1.5 }}>
+              These scores are approximations based on GitHub activity. They may not match the official GSSoC leaderboard due to undisclosed scoring constraints (streaks, community tasks, form-based data, etc.).
+            </p>
+          </div>
+        </div>
+
         {/* Aggregate Stats Grid */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 12, marginBottom: 24 }}>
-          <StatCard icon={<Trophy size={16} />} label="Total Admin Points" value={totalPoints} sub="Sum of all repos" color="#4f46e5" bg="rgba(99,102,241,0.06)" />
+          <StatCard icon={<Trophy size={16} />} label="Est. Activity Points" value={totalPoints} sub="Sum of all repos (approx.)" color="#4f46e5" bg="rgba(99,102,241,0.06)" />
           <StatCard icon={<BookOpen size={16} />} label="Registered Projects" value={userRepos.length} sub="Matching repos" color="#818cf8" bg="rgba(129,140,248,0.06)" />
           <StatCard icon={<GitMerge size={16} />} label="Merged GSSoC PRs" value={totalMerged} sub="Across all projects" color={ds.primaryDeep} bg="rgba(62,207,142,0.06)" />
           <StatCard icon={<Tag size={16} />} label="Issues Labeled" value={totalLabeled} sub="Difficulty/Type tagged" color="#f59e0b" bg="rgba(245,158,11,0.06)" />
@@ -214,7 +236,7 @@ export default async function ProjectAdminDashboard({ params }: Props) {
 
         {/* Repos Breakdown */}
         <p style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 700, color: ds.inkMute2, letterSpacing: "0.08em", textTransform: "uppercase" }}>
-          Registered Projects &amp; Points Breakdown
+          Registered Projects &amp; Activity Breakdown
         </p>
 
         {repoScores.length === 0 ? (

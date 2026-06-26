@@ -195,9 +195,7 @@ function ProjectAdminTab() {
       </div>
 
       <p style={{ margin: "16px 0 0", fontSize: 11, color: ds.inkFaint, lineHeight: 1.6 }}>
-        * Note: One-time Base Application Form points are not included.
-        <br />
-        * Note: Labeled issue points are calculated at the repository level due to GitHub API rate limits.
+        * These are <strong style={{ color: "#b91c1c" }}>estimated</strong> values based on assumptions. The actual GSSoC scoring formula includes additional undisclosed factors (streaks, community bounty tasks, profile data, etc.) that may not match these estimates. Always check the official GSSoC leaderboard for accurate scores.
       </p>
     </div>
   );
