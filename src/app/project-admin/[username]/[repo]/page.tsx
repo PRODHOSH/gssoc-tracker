@@ -166,7 +166,7 @@ export default async function ProjectAdminPage({ params }: Props) {
           <StatCard icon={<Trophy size={14} />} label="Total Points" value={adminScore.total} sub="points earned" accent="#4f46e5" accentBg="rgba(99,102,241,0.07)" />
           <StatCard icon={<GitMerge size={14} />} label="Merged PRs" value={adminScore.mergedPRsCount} sub="+15 pts each" accent={ds.primaryDeep} accentBg="rgba(62,207,142,0.07)" />
           <StatCard icon={<Tag size={14} />} label="Labeled Issues" value={adminScore.labeledIssuesFullCount + adminScore.labeledIssuesDiffCount} sub="+10 / +5 pts each" accent="#f59e0b" accentBg="rgba(245,158,11,0.07)" />
-          <StatCard icon={<FolderGit2 size={14} />} label="Opened Issues" value={adminScore.openedIssuesBeginnerCount + adminScore.openedIssuesOtherCount} sub="by @owner (+8 / +3)" accent="#8b5cf6" accentBg="rgba(139,92,246,0.07)" />
+          <StatCard icon={<FolderGit2 size={14} />} label="Opened Issues" value={adminScore.openedIssuesBeginnerCount + adminScore.openedIssuesOtherCount} sub={`by @${owner} (+8 / +3)`} accent="#8b5cf6" accentBg="rgba(139,92,246,0.07)" />
         </div>
 
         {/* Empty state */}
