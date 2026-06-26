@@ -33,8 +33,8 @@ async function ghFetch(url: string) {
   return fetch(url, { headers, cache: "no-store" });
 }
 
-async function fetchRepoPRs(owner: string, repo: string): Promise<any[]> {
-  const q = `label:"gssoc:approved" repo:${owner}/${repo} type:pr is:merged`;
+async function fetchRepoPRs(owner: string, repo: string, adminUsername: string): Promise<any[]> {
+  const q = `label:"gssoc:approved" repo:${owner}/${repo} type:pr is:merged merged-by:${adminUsername}`;
   const url = `https://api.github.com/search/issues?q=${encodeURIComponent(q)}&per_page=100&sort=created&order=desc`;
   const res = await ghFetch(url);
   if (res.status === 403 || res.status === 429) throw new Error("RATE_LIMITED");
@@ -50,7 +50,9 @@ async function fetchRepoPRs(owner: string, repo: string): Promise<any[]> {
       Array.from({ length: pages }, async (_, i) => {
         const pageUrl = `https://api.github.com/search/issues?q=${encodeURIComponent(q)}&per_page=100&page=${i + 2}&sort=created&order=desc`;
         const r = await ghFetch(pageUrl);
-        if (!r.ok) return [];
+        if (r.status === 403 || r.status === 429) throw new Error("RATE_LIMITED");
+        if (r.status === 422 || r.status === 404) return [];
+        if (!r.ok) throw new Error(`API_ERROR:${r.status}`);
         const d = await r.json() as { items: any[] };
         return d.items;
       })
@@ -78,7 +80,9 @@ async function fetchRepoIssues(owner: string, repo: string): Promise<any[]> {
       Array.from({ length: pages }, async (_, i) => {
         const pageUrl = `https://api.github.com/search/issues?q=${encodeURIComponent(q)}&per_page=100&page=${i + 2}&sort=created&order=desc`;
         const r = await ghFetch(pageUrl);
-        if (!r.ok) return [];
+        if (r.status === 403 || r.status === 429) throw new Error("RATE_LIMITED");
+        if (r.status === 422 || r.status === 404) return [];
+        if (!r.ok) throw new Error(`API_ERROR:${r.status}`);
         const d = await r.json() as { items: any[] };
         return d.items;
       })
@@ -91,7 +95,7 @@ async function fetchRepoIssues(owner: string, repo: string): Promise<any[]> {
 
 async function _buildAdminScore(owner: string, repo: string, adminUsername: string): Promise<AdminScoreBreakdown> {
   const [prs, issues] = await Promise.all([
-    fetchRepoPRs(owner, repo),
+    fetchRepoPRs(owner, repo, adminUsername),
     fetchRepoIssues(owner, repo),
   ]);
 

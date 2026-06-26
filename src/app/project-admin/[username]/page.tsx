@@ -50,14 +50,14 @@ export default async function ProjectAdminDashboard({ params }: Props) {
 
   // Find user's repositories registered in GSSoC 2026
   const userRepos = Array.from(GSSOC_REPO_SET).filter((repoKey) => {
-    return repoKey.split("/")[0] === decoded.toLowerCase();
+    return repoKey.split("/")[0] === user.login.toLowerCase();
   });
 
   const repoScores = await Promise.all(
     userRepos.map(async (repoKey) => {
       const [owner, repo] = repoKey.split("/");
       try {
-        const score = await buildAdminScore(owner, repo, decoded);
+        const score = await buildAdminScore(owner, repo, user.login);
         return { repoKey, score, error: null };
       } catch (err) {
         return { repoKey, score: null, error: err instanceof Error ? err.message : "Error fetching repo stats" };
@@ -239,6 +239,7 @@ export default async function ProjectAdminDashboard({ params }: Props) {
               }
 
               if (!score) return null;
+              const [owner, repo] = repoKey.split("/");
 
               return (
                 <div key={repoKey} style={{
@@ -265,7 +266,7 @@ export default async function ProjectAdminDashboard({ params }: Props) {
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       <Link 
-                        href={`/project-admin/${repoKey}`}
+                        href={`/project-admin/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`}
                         style={{
                           fontSize: 12,
                           color: "#4f46e5",
