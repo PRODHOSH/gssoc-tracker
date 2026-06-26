@@ -145,8 +145,11 @@ async function _buildMentorTrackerData(username: string): Promise<MentorTrackerD
 }
 
 // Cache per username for 5 minutes — shared across all requests on the same deployment
-export const buildMentorTrackerData = unstable_cache(
-  _buildMentorTrackerData,
-  ["mentor-tracker-data"],
-  { revalidate: 300 }
-);
+export const buildMentorTrackerData = (username: string) => {
+  const u = username.toLowerCase();
+  return unstable_cache(
+    async () => _buildMentorTrackerData(u),
+    ["mentor-tracker-data", u],
+    { revalidate: 300 }
+  )();
+};

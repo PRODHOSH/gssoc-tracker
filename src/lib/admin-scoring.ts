@@ -34,7 +34,7 @@ async function ghFetch(url: string) {
 }
 
 async function fetchRepoPRs(owner: string, repo: string): Promise<any[]> {
-  const q = `label:"gssoc:approved" repo:${owner}/${repo} type:pr is:merged`;
+  const q = `label:"gssoc:approved" repo:${owner}/${repo} type:pr`;
   const url = `https://api.github.com/search/issues?q=${encodeURIComponent(q)}&per_page=100&sort=created&order=desc`;
   const res = await ghFetch(url);
   if (res.status === 403 || res.status === 429) throw new Error("RATE_LIMITED");
@@ -95,14 +95,15 @@ async function fetchRepoIssues(owner: string, repo: string): Promise<any[]> {
   return all;
 }
 
-async function _buildAdminScore(owner: string, repo: string, adminUsername: string): Promise<AdminScoreBreakdown> {
+export async function _buildAdminScore(owner: string, repo: string, adminUsername: string): Promise<AdminScoreBreakdown> {
   const [prs, issues] = await Promise.all([
     fetchRepoPRs(owner, repo),
     fetchRepoIssues(owner, repo),
   ]);
 
-  // 1. Merged PRs with gssoc:approved (the search query already filters to is:merged)
-  const mergedPRsCount = prs.length; 
+  // 1. Merged PRs with gssoc:approved
+  // Note: search issues item has `pull_request` and `pull_request.merged_at` check
+  const mergedPRsCount = prs.filter((pr) => !!pr.pull_request?.merged_at || pr.state === "closed").length; 
   const mergedPRsPoints = mergedPRsCount * 15;
 
   // 2. Labeled issues
@@ -200,9 +201,13 @@ async function _buildAdminScore(owner: string, repo: string, adminUsername: stri
   };
 }
 
-export const buildAdminScore = unstable_cache(
-  async (owner: string, repo: string, adminUsername: string) => 
-    _buildAdminScore(owner.toLowerCase(), repo.toLowerCase(), adminUsername.toLowerCase()),
-  ["admin-scoring-data"],
-  { revalidate: 300 }
-);
+export const buildAdminScore = (owner: string, repo: string, adminUsername: string) => {
+  const o = owner.toLowerCase();
+  const r = repo.toLowerCase();
+  const u = adminUsername.toLowerCase();
+  return unstable_cache(
+    async () => _buildAdminScore(o, r, u),
+    ["admin-scoring-data", o, r, u],
+    { revalidate: 300 }
+  )();
+};

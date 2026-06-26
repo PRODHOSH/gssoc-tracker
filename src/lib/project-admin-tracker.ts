@@ -211,8 +211,12 @@ async function _buildProjectAdminData(owner: string, repo: string): Promise<Proj
 }
 
 // Cache per owner+repo for 5 minutes — shared across all requests on the same deployment
-export const buildProjectAdminData = unstable_cache(
-  async (owner: string, repo: string) => _buildProjectAdminData(owner.toLowerCase(), repo.toLowerCase()),
-  ["project-admin-data"],
-  { revalidate: 300 }
-);
+export const buildProjectAdminData = (owner: string, repo: string) => {
+  const o = owner.toLowerCase();
+  const r = repo.toLowerCase();
+  return unstable_cache(
+    async () => _buildProjectAdminData(o, r),
+    ["project-admin-data", o, r],
+    { revalidate: 300 }
+  )();
+};
