@@ -34,7 +34,7 @@ async function ghFetch(url: string) {
 }
 
 async function fetchRepoPRs(owner: string, repo: string): Promise<any[]> {
-  const q = `label:"gssoc:approved" repo:${owner}/${repo} type:pr`;
+  const q = `label:"gssoc:approved" repo:${owner}/${repo} type:pr is:merged`;
   const url = `https://api.github.com/search/issues?q=${encodeURIComponent(q)}&per_page=100&sort=created&order=desc`;
   const res = await ghFetch(url);
   if (res.status === 403 || res.status === 429) throw new Error("RATE_LIMITED");
@@ -95,12 +95,16 @@ async function _buildAdminScore(owner: string, repo: string, adminUsername: stri
     fetchRepoIssues(owner, repo),
   ]);
 
-  // 1. Merged PRs with gssoc:approved
-  // Note: search issues item has `pull_request` and `pull_request.merged_at` check
-  const mergedPRsCount = prs.filter((pr) => !!pr.pull_request?.merged_at || pr.state === "closed").length; 
+  // 1. Merged PRs with gssoc:approved (the search query already filters to is:merged)
+  const mergedPRsCount = prs.length; 
   const mergedPRsPoints = mergedPRsCount * 15;
 
   // 2. Labeled issues
+  // NOTE on Rate Limiting: Ideally, we would check the GitHub Issue Events API to see exactly
+  // who applied each label. However, doing so requires making a separate API call for every single issue,
+  // which would easily trigger GitHub rate limits and cause severe latency. Instead, we scan all GSSoC issues
+  // in the repository. Since only admins and authorized mentors have write access to apply labels,
+  // this repository-wide check is a highly efficient and rate-limit safe proxy.
   let labeledIssuesFullCount = 0;
   let labeledIssuesDiffCount = 0;
 
