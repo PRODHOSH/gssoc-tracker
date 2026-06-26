@@ -196,6 +196,8 @@ function ProjectAdminTab() {
 
       <p style={{ margin: "16px 0 0", fontSize: 11, color: ds.inkFaint, lineHeight: 1.6 }}>
         * Note: One-time Base Application Form points are not included.
+        <br />
+        * Note: Labeled issue points are calculated at the repository level due to GitHub API rate limits.
       </p>
     </div>
   );

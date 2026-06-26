@@ -45,7 +45,8 @@ async function fetchRepoPRs(owner: string, repo: string, adminUsername: string):
   const all = [...data.items];
 
   if (data.total_count > 100) {
-    const pages = Math.min(Math.ceil((data.total_count - 100) / 100), 4); // fetch up to 500 PRs
+    const max = Math.min(data.total_count, 1000);
+    const pages = Math.min(Math.ceil((max - 100) / 100), 9); // fetch up to 1,000 results (Search API cap)
     const rest = await Promise.all(
       Array.from({ length: pages }, async (_, i) => {
         const pageUrl = `https://api.github.com/search/issues?q=${encodeURIComponent(q)}&per_page=100&page=${i + 2}&sort=created&order=desc`;
@@ -75,7 +76,8 @@ async function fetchRepoIssues(owner: string, repo: string): Promise<any[]> {
   const all = [...data.items];
 
   if (data.total_count > 100) {
-    const pages = Math.min(Math.ceil((data.total_count - 100) / 100), 4); // fetch up to 500 issues
+    const max = Math.min(data.total_count, 1000);
+    const pages = Math.min(Math.ceil((max - 100) / 100), 9); // fetch up to 1,000 results (Search API cap)
     const rest = await Promise.all(
       Array.from({ length: pages }, async (_, i) => {
         const pageUrl = `https://api.github.com/search/issues?q=${encodeURIComponent(q)}&per_page=100&page=${i + 2}&sort=created&order=desc`;
