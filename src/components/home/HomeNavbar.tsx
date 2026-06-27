@@ -7,7 +7,7 @@ export interface HomeNavbarProps {}
 
 export function HomeNavbar({}: Readonly<HomeNavbarProps>) {
   return (
-    <nav className="bg-canvas-night border-b border-whisper-border w-full h-16 sticky top-0 z-50">
+    <nav className="bg-canvas-night/40 backdrop-blur-md border-b border-white/10 w-full h-16 sticky top-0 z-50">
       <div className="flex justify-between items-center px-6 md:px-12 w-full h-full">
         <div className="flex items-center gap-8">
           <Link href="/" className="font-display text-2xl tracking-tighter text-primary">

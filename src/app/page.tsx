@@ -145,7 +145,7 @@ export default function HomePage() {
               className={`group flex flex-col items-start p-8 bg-pure-surface border rounded-xl transition-all duration-400 ease-out text-left ${
                 role === "contributor"
                   ? "border-primary scale-[1.02] bg-primary/5"
-                  : "border-whisper-border hover:border-primary/50"
+                  : "border-primary/40 hover:border-primary"
               }`}
               onClick={() => handleSelectRole("contributor")}
             >
@@ -170,7 +170,7 @@ export default function HomePage() {
               className={`group flex flex-col items-start p-8 bg-pure-surface border rounded-xl transition-all duration-400 ease-out text-left ${
                 role === "mentor"
                   ? "border-primary scale-[1.02] bg-primary/5"
-                  : "border-whisper-border hover:border-primary/50"
+                  : "border-primary/40 hover:border-primary"
               }`}
               onClick={() => handleSelectRole("mentor")}
             >
@@ -223,7 +223,7 @@ export default function HomePage() {
               </button>
             </form>
 
-            <div className="mt-4 flex justify-center items-center gap-2 font-mono text-[10px] text-muted-steel/60">
+            <div className="mt-4 flex justify-center items-center gap-2 font-mono text-xs text-primary/80 font-bold">
               <span
                 className={`w-2 h-2 rounded-full ${
                   state === "error"
