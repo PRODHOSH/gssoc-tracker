@@ -39,7 +39,7 @@ function notCountedInfo(pr: TrackedPR): { label: string; tooltip: string } | nul
   if (!pr.isValid) {
     return {
       label: "Disqualified",
-      tooltip: "This PR has a gssoc:invalid, gssoc:spam, or gssoc:ai-slop label, so it scores 0 points. Ask a mentor to remove that label if it was applied by mistake.",
+      tooltip: pr.disqualifiedReason || "This PR has a gssoc:invalid, gssoc:spam, or gssoc:ai-slop label, so it scores 0 points. Ask a mentor to remove that label if it was applied by mistake.",
     };
   }
   if (pr.state === "open") {

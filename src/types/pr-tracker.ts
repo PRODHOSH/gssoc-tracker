@@ -55,6 +55,7 @@ export interface TrackedPR {
   typeBonuses: string[];
   typeBonusTotal: number;
   points: number;
+  disqualifiedReason?: string;
 }
 
 export type PRRank =

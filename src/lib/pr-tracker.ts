@@ -203,14 +203,29 @@ export async function fetchGSSoCPRs(username: string): Promise<RawGitHubPR[]> {
     }
   }
 
-  const { data: dbPRs, error } = await supabase
-    .from("pull_requests")
-    .select("raw_data")
-    .eq("github_login", username);
+  let dbPRs: any[] = [];
+  let page = 0;
+  const pageSize = 1000;
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from("pull_requests")
+      .select("raw_data")
+      .eq("github_login", username)
+      .range(page * pageSize, (page + 1) * pageSize - 1);
+      
+    if (error) {
+       console.error("Supabase error:", error);
+       return fetchAllFromGitHub(baseQ);
+    }
     
-  if (error) {
-     console.error("Supabase error:", error);
-     return fetchAllFromGitHub(baseQ);
+    dbPRs.push(...data);
+    if (data.length < pageSize) {
+      hasMore = false;
+    } else {
+      page++;
+    }
   }
 
   return dbPRs.map((row: any) => row.raw_data as RawGitHubPR);
@@ -277,10 +292,7 @@ async function _buildPRTrackerData(username: string): Promise<PRTrackerData> {
     fetchGSSoCPRs(username),
   ]);
 
-  const allPRs: TrackedPR[] = await Promise.all(rawPRs.filter((pr) => {
-    const { name: repo } = repoFromUrl(pr.repository_url);
-    return GSSOC_REPO_SET.has(repo.toLowerCase());
-  }).map(async (pr) => {
+  const allPRs: TrackedPR[] = await Promise.all(rawPRs.map(async (pr) => {
     const labelNames = pr.labels.map((l) => l.name);
     const labelColors: Record<string, string> = {};
     pr.labels.forEach((l) => {
@@ -290,7 +302,13 @@ async function _buildPRTrackerData(username: string): Promise<PRTrackerData> {
     const isMerged = !!pr.pull_request?.merged_at;
     const { name: repo, url: repoUrl } = repoFromUrl(pr.repository_url);
 
+    const isOfficialRepo = GSSOC_REPO_SET.has(repo.toLowerCase());
+
     const calc = calcPoints(labelNames);
+    if (!isOfficialRepo) {
+      calc.isValid = false;
+      calc.points = 0;
+    }
 
     return {
       id: pr.id,
@@ -306,6 +324,7 @@ async function _buildPRTrackerData(username: string): Promise<PRTrackerData> {
       labelColors,
       isGSSoC: labelNames.some((l) => l.startsWith("gssoc")),
       ...calc,
+      disqualifiedReason: !isOfficialRepo ? "This PR was made in a repository that is not officially registered for GSSoC 2026. Only PRs in official repositories count toward your score." : undefined,
     };
   }));
 
