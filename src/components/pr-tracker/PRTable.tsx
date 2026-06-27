@@ -4,6 +4,7 @@ import { ExternalLink, ArrowUpDown, ArrowUp, ArrowDown, Search, Download, AlertT
 import { ds, fontMono } from "@/lib/ds";
 import { getLabelChipColors } from "@/lib/labelColors";
 import type { TrackedPR } from "@/types/pr-tracker";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 /* ── Pagination helper ───────────────────────────────────────── */
 function pageItems(current: number, total: number): (number | null)[] {
@@ -58,15 +59,24 @@ function notCountedInfo(pr: TrackedPR): { label: string; tooltip: string } | nul
 
 function NotCountedBadge({ info }: { info: { label: string; tooltip: string } }) {
   return (
-    <span title={info.tooltip} style={{
-      display: "inline-flex", alignItems: "center", gap: 3,
-      padding: "1px 6px", borderRadius: ds.rFull,
-      background: "rgba(220,38,38,0.07)", border: "1px solid rgba(220,38,38,0.2)",
-      color: "#dc2626", fontSize: 10, fontWeight: 600,
-      whiteSpace: "nowrap", cursor: "help",
-    }}>
-      <AlertTriangle size={10} /> {info.label}
-    </span>
+    <TooltipProvider delay={100}>
+      <Tooltip>
+        <TooltipTrigger>
+          <span style={{
+            display: "inline-flex", alignItems: "center", gap: 3,
+            padding: "1px 6px", borderRadius: ds.rFull,
+            background: "rgba(220,38,38,0.07)", border: "1px solid rgba(220,38,38,0.2)",
+            color: "#dc2626", fontSize: 10, fontWeight: 600,
+            whiteSpace: "nowrap", cursor: "help",
+          }}>
+            <AlertTriangle size={10} /> {info.label}
+          </span>
+        </TooltipTrigger>
+        <TooltipContent className="max-w-xs text-center font-sans text-xs">
+          {info.tooltip}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
 
