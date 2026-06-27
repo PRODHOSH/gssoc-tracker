@@ -192,7 +192,7 @@ export function PRTable({ prs, username }: Props) {
       border: `1px solid ${ds.hairlineCool}`,
       borderRadius: ds.rLg,
       overflow: "hidden",
-      boxShadow: ds.shadowSubtle,
+      boxShadow: "0 1px 3px rgba(23,23,23,0.05)",
       width: "100%",
       maxWidth: "100%",
     }}>
