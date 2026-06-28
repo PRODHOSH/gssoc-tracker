@@ -25,6 +25,7 @@ export interface RawGitHubPR {
   html_url: string;
   state: "open" | "closed";
   created_at: string;
+  updated_at: string;
   closed_at: string | null;
   repository_url: string;
   labels: PRLabel[];
@@ -55,6 +56,7 @@ export interface TrackedPR {
   typeBonuses: string[];
   typeBonusTotal: number;
   points: number;
+  disqualifiedReason?: string;
 }
 
 export type PRRank =

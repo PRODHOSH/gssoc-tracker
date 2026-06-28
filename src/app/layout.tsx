@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import { ClickExplosion } from "@/components/animations/ClickExplosion";
+import { CSPostHogProvider } from "./providers";
 import "./globals.css";
 
 const BASE_URL = "https://gssoc-tracker.vercel.app";
@@ -191,7 +192,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="min-h-screen bg-background text-ink font-sans">
         <ClickExplosion />
-        {children}
+        <CSPostHogProvider>
+          {children}
+        </CSPostHogProvider>
         <Analytics />
         <Script
           id="schema-org"

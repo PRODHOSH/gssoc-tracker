@@ -117,7 +117,7 @@ function ContributorTab() {
       />
       <div style={{ background: "rgba(62,207,142,0.05)", border: "1px solid rgba(62,207,142,0.2)", borderRadius: ds.rMd, padding: "12px 14px" }}>
         <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 700, color: ds.primaryDeep, letterSpacing: "0.06em", textTransform: "uppercase" }}>Example</p>
-        <p style={{ margin: "0 0 4px", fontSize: 12, color: ds.inkMute, fontFamily: fontMono }}>gssoc:approved + level:advanced + quality:exceptional + type:devops</p>
+        <p style={{ margin: "0 0 4px", fontSize: 12, color: ds.inkMute, fontFamily: fontMono, wordBreak: "break-word" }}>gssoc:approved + level:advanced + quality:exceptional + type:devops</p>
         <p style={{ margin: 0, fontSize: 13, color: ds.ink, fontFamily: fontMono, fontWeight: 600 }}>
           = 50 + (55 × 1.5) + 15 = <span style={{ color: ds.primaryDeep }}>147 pts</span>
         </p>

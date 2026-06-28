@@ -3,6 +3,7 @@ import { useState, useMemo } from "react";
 import { ExternalLink, ArrowUpDown, ArrowUp, ArrowDown, Search, Download, AlertTriangle } from "lucide-react";
 import { getLabelChipColors } from "@/lib/labelColors";
 import type { TrackedPR } from "@/types/pr-tracker";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 /* ── Pagination helper ───────────────────────────────────────── */
 function pageItems(current: number, total: number): (number | null)[] {
@@ -33,7 +34,7 @@ function notCountedInfo(pr: TrackedPR): { label: string; tooltip: string } | nul
   if (!pr.isValid) {
     return {
       label: "Disqualified",
-      tooltip: "This PR has a gssoc:invalid, gssoc:spam, or gssoc:ai-slop label, so it scores 0 points. Ask a mentor to remove that label if it was applied by mistake.",
+      tooltip: pr.disqualifiedReason || "This PR has a gssoc:invalid, gssoc:spam, or gssoc:ai-slop label, so it scores 0 points. Ask a mentor to remove that label if it was applied by mistake.",
     };
   }
   if (pr.state === "open") {
@@ -59,6 +60,18 @@ function NotCountedBadge({ info }: { info: { label: string; tooltip: string } })
     >
       <AlertTriangle size={10} /> {info.label}
     </span>
+    <TooltipProvider delay={100}>
+      <Tooltip>
+        <TooltipTrigger>
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold cursor-help">
+            <AlertTriangle size={10} /> {info.label}
+          </span>
+        </TooltipTrigger>
+        <TooltipContent className="max-w-xs text-center font-sans text-xs">
+          {info.tooltip}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
 

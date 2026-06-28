@@ -14,6 +14,8 @@ import { HomeFooter } from "@/components/home/HomeFooter";
 import { QuickFeedbackPopup } from "@/components/QuickFeedbackPopup";
 import type { PRTrackerData } from "@/types/pr-tracker";
 import type { Metadata } from "next";
+import { NpsFeedback } from "@/components/NpsFeedback"; 
+import { StarNudge } from "@/components/StarNudge";     
 
 export const dynamic = "force-dynamic";
 
@@ -67,6 +69,10 @@ export default async function PRTrackerDashboard({ params }: Props) {
   return (
     <div className="bg-background text-ghost-white min-h-screen font-sans flex flex-col overflow-x-hidden">
       <TrackerNavbar username={decoded} />
+      
+      <NpsFeedback />
+      <StarNudge username={decoded} />
+      <main className="pt-24 pb-16 max-w-[1200px] mx-auto px-8 w-full flex-1">
 
       <main className="pt-24 pb-16 max-w-[1200px] mx-auto px-8 w-full flex-1">
         {/* Profile */}

@@ -38,15 +38,19 @@ export default function HomePage() {
   const [role, setRole] = useState<Role | null>(null);
   const [input, setInput] = useState("");
   const [state, setState] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [step, setStep] = useState<"role" | "input">("role");
+  const [role, setRole] = useState<Role | null>(null);
+  const [input, setInput] = useState("");
+  const [state, setState] = useState<"idle" | "loading" | "error">("idle");
   const [errMsg, setErrMsg] = useState("");
   const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
-    if (!localStorage.getItem("gssoc_guidelines_v1")) setShowBanner(true);
+    if (!localStorage.getItem("gssoc_validator_banner")) setShowBanner(true);
   }, []);
 
   function dismissBanner() {
-    localStorage.setItem("gssoc_guidelines_v1", "1");
+    localStorage.setItem("gssoc_validator_banner", "1");
     setShowBanner(false);
   }
 

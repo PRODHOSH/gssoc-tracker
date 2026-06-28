@@ -17,19 +17,19 @@
 
 ## Why I built this
 
-The official GSSoC leaderboard takes time to load, and that makes sense. It is processing 45,000+ contributors filtered to specific registered project repos — that is a genuinely hard problem at scale.
+The official GSSoC leaderboard takes time to load, and that makes sense. It is processing 45,000+ contributors filtered to specific registered project repos - that is a genuinely hard problem at scale.
 
 But as a contributor, I just wanted a fast personal view of my own PRs, with labels, charts, and a score breakdown I could actually read. So I built it for myself.
 
 When I shared it with a few people, one thing became obvious: a lot of contributors had no idea whether their PRs had actually been accepted. They could not tell if a label had been applied, if their score had changed, or why two similar PRs gave different points. This tool answers those questions directly.
 
-That is why I put it out for the community. It is not trying to replace the official tracker. It is just a faster, clearer way to understand your own contributions. Over 800 people use it now.
+That is why I put it out for the community. It is not trying to replace the official tracker. It is just a faster, clearer way to understand your own contributions. Over 2000 people use it now.
 
 ---
 
 ## What it does
 
-You pick your role — contributor or mentor — enter your GitHub username, and the tracker pulls your relevant PRs and calculates your score. Everything is filtered to officially registered GSSoC 2026 projects, so the score you see here aligns with what the official leaderboard uses.
+You pick your role - contributor or mentor - enter your GitHub username, and the tracker pulls your relevant PRs and calculates your score. Everything is filtered to officially registered GSSoC 2026 projects, so the score you see here aligns with what the official leaderboard uses.
 
 ### Contributor tracker
 
@@ -60,7 +60,7 @@ PRs tagged `gssoc:invalid`, `gssoc:spam`, or `gssoc:ai-slop` score 0.
 
 ### Mentor tracker
 
-If you are a GSSoC mentor, you can track the PRs you have reviewed. It searches for PRs labelled `mentor:yourusername` and `gssoc:approved` — filtered to official repos — and calculates your mentor score. Only **merged** PRs count toward your total.
+If you are a GSSoC mentor, you can track the PRs you have reviewed. It searches for PRs labelled `mentor:yourusername` and `gssoc:approved` - filtered to official repos - and calculates your mentor score. Only **merged** PRs count toward your total.
 
 ```
 Score = level base + quality bonus
@@ -79,7 +79,7 @@ Score = level base + quality bonus
 
 ![PR Validator](public/pr-check.png)
 
-Ever submitted a PR and wondered — does this actually count? Go to [/pr-check](https://gssoc-tracker.vercel.app/pr-check), paste the GitHub PR link, and you get an instant answer.
+Ever submitted a PR and wondered - does this actually count? Go to [/pr-check](https://gssoc-tracker.vercel.app/pr-check), paste the GitHub PR link, and you get an instant answer.
 
 It runs through every condition that matters:
 
@@ -88,7 +88,7 @@ It runs through every condition that matters:
 - Is the repo part of the officially registered GSSoC 2026 projects?
 - Does it have any disqualifying flags like `gssoc:spam` or `gssoc:ai-slop`?
 
-For each condition it tells you clearly what is passing, what is missing, and what you need to fix. If the PR does count, it shows the full points breakdown — base score, difficulty, quality multiplier, type bonuses — so you know exactly how many points it is worth.
+For each condition it tells you clearly what is passing, what is missing, and what you need to fix. If the PR does count, it shows the full points breakdown - base score, difficulty, quality multiplier, type bonuses - so you know exactly how many points it is worth.
 
 No username needed. Just the PR link.
 
@@ -96,9 +96,9 @@ No username needed. Just the PR link.
 
 Both tracker pages show three charts:
 
-- **Level distribution** — breakdown of your PRs by difficulty level
-- **Quality distribution** — how many PRs had a quality label vs none
-- **Type breakdown** — which PR types (bug, feature, docs, etc.) you contributed most
+- **Level distribution** - breakdown of your PRs by difficulty level
+- **Quality distribution** - how many PRs had a quality label vs none
+- **Type breakdown** - which PR types (bug, feature, docs, etc.) you contributed most
 
 ---
 
@@ -132,12 +132,15 @@ The env vars you need:
 
 | Variable | What it is |
 |---|---|
-| `GH_TOKEN` | GitHub personal access token (public_repo read only) — increases API rate limit from 60 to 5000 req/hr |
+| `GH_TOKEN` | GitHub personal access token (public_repo read only) - increases API rate limit from 60 to 5000 req/hr |
 | `SMTP_USER` | Gmail address for sending alert emails |
 | `SMTP_PASS` | Gmail app password (not your account password) |
 | `NOTIFY_EMAIL` | Where feedback and admin emails are sent |
 | `SYNC_SECRET` | Secret key for the score sync webhook |
-| `APP_URL` | Your deployment URL |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL for caching PR data |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key to bypass RLS |
+| `NEXT_PUBLIC_POSTHOG_KEY` | PostHog API key for tracking page views and catching UI bugs |
+| `NEXT_PUBLIC_POSTHOG_HOST` | PostHog host URL |
 
 Then start the dev server:
 
@@ -151,14 +154,17 @@ Open `http://localhost:3000` and you are good to go.
 
 ## Tech stack
 
-- **Next.js 16** (App Router, server components, `unstable_cache` for GitHub API caching)
+- **Next.js 16** (App Router, server components, edge caching)
 - **TypeScript**
+- **Supabase** (Postgres database to cache PRs and prevent GitHub API rate limits)
+- **PostHog** (Anonymous analytics and video replays to catch UI bugs)
+- **Google Analytics** (For basic site traffic tracking)
 - **Recharts** for all charts
 - **Framer Motion** for animations
 - **Nodemailer** for email alerts
-- **Vercel** for hosting and edge caching
+- **Vercel** for hosting
 
-No database. No auth. No external services beyond GitHub API and Gmail.
+To keep the tracker fast and prevent GitHub from blocking us, we securely cache public PR data in Supabase. We also use PostHog and Google Analytics to understand how people use the site and fix bugs quickly.
 
 ---
 
@@ -181,7 +187,7 @@ This is an independent community tool, not affiliated with GirlScript Summer of 
 
 ## Built by
 
-**Prodhosh V.S** — GSSoC 2026 Ambassador + Contributor, VIT Chennai
+**Prodhosh V.S** - GSSoC 2026 Ambassador + Contributor, VIT Chennai
 
 Built this to scratch my own itch, kept it because it turned out useful for a lot of people. If it helped you, a star on the repo goes a long way.
 

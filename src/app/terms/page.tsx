@@ -127,13 +127,15 @@ export default function TermsPage() {
           </P>
           <P>Here is exactly what happens when you search a username:</P>
           <Bullets items={[
-            "Your public pull requests are fetched from the GitHub API",
+            "We check our Supabase database to see if we already have your pull requests",
+            "If it has been more than 1 minute since your last check, we ask GitHub for any new or updated PRs",
+            "We save that new data to our database so the app stays lightning fast and avoids GitHub rate limits",
             "The GSSoC labels on each PR are read (gssoc:approved, level:*, quality:*, type:*, etc.)",
             "Points are calculated using the GSSoC 2026 scoring formula",
             "Charts and stats are generated and shown to you",
           ]} />
           <P>
-            Results are <Bright>cached for up to 5 minutes</Bright> on Vercel&apos;s servers to reduce GitHub API load. After that window the data is gone. Nothing is stored long term, and nothing is sold.
+            Because we use a smart 1 minute delta sync, your updates appear almost instantly while keeping the site completely crash proof during huge traffic spikes.
           </P>
         </Section>
 
@@ -143,7 +145,7 @@ export default function TermsPage() {
             <strong>We now filter to the 421 officially registered GSSoC 2026 projects.</strong> Your score here reflects only PRs in repos on that list — the same set the official leaderboard uses.
           </Note>
           <P>
-            We fetch the project list directly from <Bright>gssoc.girlscript.org/api/projects</Bright> and check every PR against it. If a repo is not on the list, that PR does not appear in your tracker and does not count toward your score here.
+            We fetch the project list directly from <Bright>gssoc.girlscript.org/api/projects</Bright> and check every PR against it. If a repo is not on the list, we still show the PR in your tracker list so you aren't confused about where it went, but we explicitly mark it as <strong>Disqualified (0 points)</strong> so it does not falsely inflate your score.
           </P>
           <P>
             The <Hi>PR Validator</Hi> at <Bright>/pr-check</Bright> lets you paste any PR link and see exactly which category it falls into — valid, unofficial, not approved, and so on. It also shows the full points breakdown for that specific PR.
@@ -161,23 +163,17 @@ export default function TermsPage() {
           <Bullets items={[
             "No accounts, no sign-up, no passwords",
             "No selling, sharing, or monetising of any data",
-            "No tracking of which usernames you look up",
           ]} />
 
-          <P><Bright>Google Analytics:</Bright> This site uses Google Analytics to understand how many people visit and which features they use. It collects anonymised, aggregated data like page views and session counts. No personal information is shared with us through it. You can read more in the{" "}
-            <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style={{ color: ds.primary, textDecoration: "underline" }}>Google Privacy Policy</a>.
-          </P>
+          <P><Bright>GitHub API & Supabase Storage:</Bright> To fetch your contributions, we query the public GitHub API. To make the tracker lightning fast and prevent GitHub from blocking us due to rate limits, we store a copy of your public GSSoC pull requests in a Supabase database. This data is strictly the public information already visible on GitHub (PR titles, labels, links, and merge times). We do not have access to your private repos or code. This data is used solely to generate the statistics you see on your dashboard, including total points, merged PRs, active streak, and contributor rank.</P>
 
-          <P><Bright>Email alerts (optional):</Bright> If you subscribe to PR alerts, your GitHub username and email address are saved in a file inside this project&apos;s GitHub repository. That is literally where the data lives — a plain file in the repo, nothing fancier. It is only used to send you alerts and nothing else. You can remove yourself any time using the unsubscribe link in any alert email, and your entry gets deleted from that file immediately. We do not share it with anyone.</P>
+          <P><Bright>Analytics & Crash Tracking:</Bright> We use Google Analytics, Vercel Analytics, and PostHog to track page views, monitor app stability, and understand how the site is used. Our site is also monitored via Google Search Console. To help us fix UI bugs and crashes quickly, PostHog safely records anonymous video replays of your sessions. These recordings only capture how you interact with the UI so we can see exactly what broke. No personally identifiable information or private repository data is tracked or recorded.</P>
 
-          <P><Bright>Feedback (optional):</Bright> If you submit a rating or comment through the feedback widget, your response is submitted anonymously to a Google Form. No name, email, or identifying information is collected. A flag is saved in your browser&apos;s local storage so the prompt does not appear again on the same device — this data never leaves your browser.</P>
+          <P><Bright>Email alerts (optional):</Bright> If you subscribe to PR alerts, your GitHub username and email address are saved in a file inside this project's GitHub repository. That is literally where the data lives, a plain file in the repo, nothing fancier. It is only used to send you alerts and nothing else. You can remove yourself any time using the unsubscribe link in any alert email, and your entry gets deleted from that file immediately. We do not share it with anyone.</P>
 
-          <P>The only external service called for tracker functionality is the GitHub REST API at api.github.com, which is subject to{" "}
-            <a href="https://docs.github.com/en/site-policy/github-terms/github-terms-of-service" target="_blank" rel="noopener noreferrer" style={{ color: ds.primary, textDecoration: "underline" }}>GitHub&apos;s own terms</a>.
-          </P>
+          <P><Bright>Feedback (optional):</Bright> If you submit a rating or comment through the feedback widget, your response is submitted anonymously to a Google Form. No name, email, or identifying information is collected. A flag is saved in your browser's local storage so the prompt does not appear again on the same device, this data never leaves your browser.</P>
 
-          <P>
-            Questions about privacy? Email{" "}
+          <P>Questions about privacy? Email{" "}
             <a href="mailto:prodhoshlaptop@gmail.com" style={{ color: ds.primary, textDecoration: "underline" }}>prodhoshlaptop@gmail.com</a>.
           </P>
         </Section>
