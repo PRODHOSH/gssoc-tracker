@@ -99,7 +99,7 @@ const REPOS: string[] = [
   "celtrix-os/celtrix",
   "charushi06/studyplan",
   "checkora/checkora",
-  "chetan0e/secondbrain",
+  "chetan0e/Verath",
   "choudharyms/nyayavanni",
   "chunnu-munnu/payshield-aiops",
   "codegraphcontext/codegraphcontext",
