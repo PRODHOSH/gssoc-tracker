@@ -8,6 +8,7 @@ import { PRTable } from "@/components/pr-tracker/PRTable";
 import { AnalyticsCharts } from "@/components/AnalyticsCharts";
 import { ScoringGuide } from "@/components/pr-tracker/ScoringGuide";
 import { TrackerNavbar } from "@/components/pr-tracker/TrackerNavbar";
+import { ScrollSlideIn } from "@/components/animations/ScrollSlideIn";
 import { ContributionHeatmap } from "@/components/pr-tracker/ContributionHeatmap";
 import { HomeFooter } from "@/components/home/HomeFooter";
 import { QuickFeedbackPopup } from "@/components/QuickFeedbackPopup";
@@ -64,7 +65,7 @@ export default async function PRTrackerDashboard({ params }: Props) {
   if (!data) return notFound();
 
   return (
-    <div className="bg-background text-ghost-white min-h-screen font-sans flex flex-col">
+    <div className="bg-background text-ghost-white min-h-screen font-sans flex flex-col overflow-x-hidden">
       <TrackerNavbar username={decoded} />
 
       <main className="pt-24 pb-16 max-w-[1200px] mx-auto px-8 w-full flex-1">
@@ -90,16 +91,22 @@ export default async function PRTrackerDashboard({ params }: Props) {
         {/* Charts */}
         {data.validPRs.length > 0 && (
           <>
-            <ContributionHeatmap prs={data.validPRs} streak={data.streak} />
+            <ScrollSlideIn direction="left">
+              <ContributionHeatmap prs={data.validPRs} streak={data.streak} />
+            </ScrollSlideIn>
             <AnalyticsCharts prs={data.validPRs} />
           </>
         )}
 
         {/* PR Table */}
-        <PRTable prs={data.allPRs} username={data.user.login} />
+        <ScrollSlideIn direction="left">
+          <PRTable prs={data.allPRs} username={data.user.login} />
+        </ScrollSlideIn>
 
         {/* Scoring Guide */}
-        <ScoringGuide />
+        <ScrollSlideIn direction="right">
+          <ScoringGuide />
+        </ScrollSlideIn>
       </main>
 
       <HomeFooter />

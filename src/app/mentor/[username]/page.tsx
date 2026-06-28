@@ -164,10 +164,13 @@ export default async function MentorTrackerPage({ params }: Props) {
             <SectionLabel>Analytics</SectionLabel>
             <div style={{ marginBottom: 20 }}>
               <AnalyticsCharts prs={data.prs.map((pr) => ({
-                levelKey: pr.levelLabel,
-                qualityKey: pr.qualityLabel,
-                typeKeys: pr.labels.filter((l) => l.startsWith("type:")),
-              }))} />
+                difficulty: pr.levelLabel,
+                quality: pr.qualityLabel,
+                typeBonuses: pr.labels.filter((l) => l.startsWith("type:")),
+                mergedAt: pr.mergedAt,
+                createdAt: pr.createdAt,
+                points: pr.points,
+              } as unknown as import("@/types/pr-tracker").TrackedPR))} />
             </div>
           </>
         )}

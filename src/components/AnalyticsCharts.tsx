@@ -5,6 +5,7 @@ import {
   LineChart, Line
 } from "recharts";
 import type { TrackedPR } from "@/types/pr-tracker";
+import { ScrollSlideIn } from "@/components/animations/ScrollSlideIn";
 
 const LEVEL_COLORS: Record<string, string> = {
   "level:beginner":     "#059669",
@@ -235,24 +236,26 @@ export function AnalyticsCharts({ prs }: { prs: TrackedPR[] }) {
   return (
     <div className="flex flex-col gap-6 mb-16">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="flex flex-col gap-6">
+        <ScrollSlideIn direction="right" className="flex flex-col gap-6">
           <ChartCard title="PRs by Difficulty" metric="SYSTEM_METRIC: LVL_DIST">
             <LevelChart prs={prs} />
           </ChartCard>
           <ChartCard title="Quality Distribution" metric="SYSTEM_METRIC: Q_DIST">
             <QualityChart prs={prs} />
           </ChartCard>
-        </div>
+        </ScrollSlideIn>
         
-        <div className="flex flex-col gap-6">
+        <ScrollSlideIn direction="left" className="flex flex-col gap-6">
           <ChartCard title="Contribution Growth" metric="SYSTEM_METRIC: GROWTH">
             <GrowthChart prs={prs} />
           </ChartCard>
-        </div>
+        </ScrollSlideIn>
       </div>
-      <ChartCard title="PR Type Breakdown" metric="SYSTEM_METRIC: TYPE_DIST">
-        <TypeChart prs={prs} />
-      </ChartCard>
+      <ScrollSlideIn direction="right">
+        <ChartCard title="PR Type Breakdown" metric="SYSTEM_METRIC: TYPE_DIST">
+          <TypeChart prs={prs} />
+        </ChartCard>
+      </ScrollSlideIn>
     </div>
   );
 }
