@@ -35,8 +35,10 @@ export async function POST(req: NextRequest) {
   }
 
   // Verify GitHub username exists
+  const headers: Record<string, string> = { Accept: "application/vnd.github.v3+json" };
+  if (process.env.GH_TOKEN) headers.Authorization = `Bearer ${process.env.GH_TOKEN}`;
   const ghRes = await fetch(`https://api.github.com/users/${encodeURIComponent(github)}`, {
-    headers: { Accept: "application/vnd.github.v3+json" },
+    headers
   });
   if (!ghRes.ok) {
     return NextResponse.json({ error: `GitHub user "@${github}" not found` }, { status: 400 });

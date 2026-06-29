@@ -244,9 +244,9 @@ function ErrorPage({ owner, repo, code }: { owner: string; repo: string; code: s
             ? "GitHub API rate limit exceeded. Try again in a few minutes."
             : `Failed to fetch data for ${owner}/${repo}.`}
         </p>
-        <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 20px", borderRadius: ds.rSm, background: ds.primary, color: ds.onPrimary, textDecoration: "none", fontSize: 14, fontWeight: 600 }}>
-          <ArrowLeft size={14} /> Try again
-        </Link>
+        <a href="" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 20px", borderRadius: ds.rSm, background: ds.primary, color: ds.onPrimary, textDecoration: "none", fontSize: 14, fontWeight: 600 }}>
+          <RefreshCw size={14} /> Try again
+        </a>
       </div>
     </div>
   );

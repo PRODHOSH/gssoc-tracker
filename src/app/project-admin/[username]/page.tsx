@@ -454,14 +454,14 @@ function ErrorPage({ username, code }: { username: string; code: string }) {
             ? "GitHub API rate limit exceeded. Add a GH_TOKEN env var to get 5,000 req/hr, or wait a few minutes."
             : `Failed to fetch GSSoC Project Admin data for @${username}.`}
         </p>
-        <Link href="/" style={{
+        <a href="" style={{
           display: "inline-flex", alignItems: "center", gap: 6,
           padding: "9px 20px", borderRadius: ds.rSm,
           background: ds.primary, color: ds.onPrimary,
           textDecoration: "none", fontSize: 14, fontWeight: 600,
         }}>
-          <ArrowLeft size={14} /> Try again
-        </Link>
+          <RefreshCw size={14} /> Try again
+        </a>
       </div>
     </div>
   );

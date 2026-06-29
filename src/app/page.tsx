@@ -79,7 +79,7 @@ export default function Home() {
     setState("loading");
 
     try {
-      const res = await fetch(`https://api.github.com/users/${encodeURIComponent(raw)}`);
+      const res = await fetch(`/api/github-user?username=${encodeURIComponent(raw)}`);
       if (res.status === 404) { setErrMsg("GitHub user not found"); setState("error"); return; }
       if (!res.ok) { setErrMsg("Couldn't reach GitHub. Try again."); setState("error"); return; }
       if (role === "contributor") {
