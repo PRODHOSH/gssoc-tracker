@@ -171,18 +171,44 @@ export function ProjectPRTable({ prs }: { prs: ProjectAdminPR[] }) {
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div style={{ padding: "12px 18px", borderTop: `1px solid ${ds.hairlineCool}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <span style={{ fontSize: 12, color: ds.inkMute2 }}>Page {page} of {totalPages}</span>
-          <div style={{ display: "flex", gap: 6 }}>
-            {[...Array(totalPages)].map((_, i) => (
-              <button key={i} onClick={() => setPage(i + 1)} style={{ width: 28, height: 28, borderRadius: ds.rSm, border: `1px solid ${page === i + 1 ? ds.primary : ds.hairline}`, background: page === i + 1 ? "rgba(62,207,142,0.08)" : "transparent", color: page === i + 1 ? ds.primaryDeep : ds.inkMute, fontSize: 12, fontWeight: page === i + 1 ? 600 : 400, cursor: "pointer" }}>
-                {i + 1}
+      {totalPages > 1 && (() => {
+        // Build a truncated page window: [1, ..., current-1, current, current+1, ..., last]
+        const pages: (number | "...")[] = [];
+        if (totalPages <= 7) {
+          for (let i = 1; i <= totalPages; i++) pages.push(i);
+        } else {
+          pages.push(1);
+          if (page > 3) pages.push("...");
+          for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) pages.push(i);
+          if (page < totalPages - 2) pages.push("...");
+          pages.push(totalPages);
+        }
+
+        const btnBase = { height: 28, borderRadius: ds.rSm, fontSize: 12, cursor: "pointer", border: `1px solid ${ds.hairline}`, background: "transparent", color: ds.inkMute } as const;
+
+        return (
+          <div style={{ padding: "12px 18px", borderTop: `1px solid ${ds.hairlineCool}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span style={{ fontSize: 12, color: ds.inkMute2 }}>Page {page} of {totalPages}</span>
+            <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+              <button disabled={page === 1} onClick={() => setPage(page - 1)} style={{ ...btnBase, padding: "0 8px", opacity: page === 1 ? 0.4 : 1, cursor: page === 1 ? "default" : "pointer" }}>
+                ←
               </button>
-            ))}
+              {pages.map((p, i) =>
+                p === "..." ? (
+                  <span key={`dots-${i}`} style={{ width: 28, textAlign: "center", fontSize: 12, color: ds.inkFaint }}>…</span>
+                ) : (
+                  <button key={p} onClick={() => setPage(p)} style={{ ...btnBase, width: 28, border: `1px solid ${page === p ? ds.primary : ds.hairline}`, background: page === p ? "rgba(62,207,142,0.08)" : "transparent", color: page === p ? ds.primaryDeep : ds.inkMute, fontWeight: page === p ? 600 : 400 }}>
+                    {p}
+                  </button>
+                )
+              )}
+              <button disabled={page === totalPages} onClick={() => setPage(page + 1)} style={{ ...btnBase, padding: "0 8px", opacity: page === totalPages ? 0.4 : 1, cursor: page === totalPages ? "default" : "pointer" }}>
+                →
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }

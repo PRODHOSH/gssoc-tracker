@@ -175,6 +175,9 @@ async function _buildProjectAdminData(owner: string, repo: string): Promise<Proj
     const { name: repoName, url: repoUrl } = repoFromUrl(pr.repository_url);
     const calc = calcPoints(labelNames);
 
+    // Only merged PRs earn points — open/closed PRs show 0
+    const finalCalc = isMerged ? calc : { ...calc, isValid: false, points: 0 };
+
     return {
       id: pr.id,
       number: pr.number,
@@ -190,7 +193,7 @@ async function _buildProjectAdminData(owner: string, repo: string): Promise<Proj
       author: pr.user.login,
       authorUrl: `https://github.com/${pr.user.login}`,
       authorAvatar: pr.user.avatar_url,
-      ...calc,
+      ...finalCalc,
     };
   });
 
