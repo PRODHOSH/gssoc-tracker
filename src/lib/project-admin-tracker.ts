@@ -219,7 +219,7 @@ export const buildProjectAdminData = (owner: string, repo: string) => {
   const r = repo.toLowerCase();
   return unstable_cache(
     async () => _buildProjectAdminData(o, r),
-    ["project-admin-data", o, r],
+    ["project-admin-data-v2", o, r],
     { revalidate: 300 }
   )();
 };

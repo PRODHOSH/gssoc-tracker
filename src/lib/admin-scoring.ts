@@ -207,7 +207,7 @@ export const buildAdminScore = (owner: string, repo: string, adminUsername: stri
   const u = adminUsername.toLowerCase();
   return unstable_cache(
     async () => _buildAdminScore(o, r, u),
-    ["admin-scoring-data", o, r, u],
+    ["admin-scoring-data-v2", o, r, u],
     { revalidate: 300 }
   )();
 };
