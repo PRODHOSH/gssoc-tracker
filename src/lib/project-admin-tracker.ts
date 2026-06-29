@@ -1,4 +1,4 @@
-import { unstable_cache } from "next/cache";
+import { supabase } from "./supabase";
 import type { RawGitHubPR } from "@/types/pr-tracker";
 
 /* ── Scoring (same as contributor) ──────────────────────────── */
@@ -103,8 +103,24 @@ async function fetchRepoInfo(owner: string, repo: string): Promise<RepoInfo> {
   return res.json() as Promise<RepoInfo>;
 }
 
-async function fetchRepoPRs(owner: string, repo: string): Promise<RawPRWithUser[]> {
-  const q = `label:"gssoc:approved" repo:${owner}/${repo} type:pr`;
+/* ── GitHub paginated fetch ─────────────────────────────────── */
+
+async function fetchPages(q: string, startPage: number, pages: number, order: "asc" | "desc"): Promise<RawPRWithUser[]> {
+  const rest = await Promise.all(
+    Array.from({ length: pages }, async (_, i) => {
+      const pageUrl = `https://api.github.com/search/issues?q=${encodeURIComponent(q)}&per_page=100&page=${i + startPage}&sort=created&order=${order}`;
+      const r = await ghFetch(pageUrl);
+      if (!r.ok) return [] as RawPRWithUser[];
+      const d = await r.json() as { items: RawPRWithUser[] };
+      return d.items;
+    })
+  );
+  const result: RawPRWithUser[] = [];
+  rest.forEach((items) => result.push(...items));
+  return result;
+}
+
+async function fetchAllFromGitHub(q: string): Promise<RawPRWithUser[]> {
   const url = `https://api.github.com/search/issues?q=${encodeURIComponent(q)}&per_page=100&sort=created&order=desc`;
   const res = await ghFetch(url);
   if (res.status === 403 || res.status === 429) throw new Error("RATE_LIMITED");
@@ -115,21 +131,128 @@ async function fetchRepoPRs(owner: string, repo: string): Promise<RawPRWithUser[
   const all = [...data.items];
 
   if (data.total_count > 100) {
-    const pages = Math.min(Math.ceil((data.total_count - 100) / 100), 9);
-    const rest = await Promise.all(
-      Array.from({ length: pages }, async (_, i) => {
-        const pageUrl = `https://api.github.com/search/issues?q=${encodeURIComponent(q)}&per_page=100&page=${i + 2}&sort=created&order=desc`;
-        const r = await ghFetch(pageUrl);
-        if (!r.ok) return [] as RawPRWithUser[];
-        const d = await r.json() as { items: RawPRWithUser[] };
-        return d.items;
-      })
-    );
-    rest.forEach((items) => all.push(...items));
+    if (data.total_count > 1000) {
+      // ASC/DESC hack to grab up to 2000 PRs (same pattern as pr-tracker)
+      const [descPages, ascPages] = await Promise.all([
+        fetchPages(q, 2, 9, "desc"),
+        fetchPages(q, 1, 10, "asc"),
+      ]);
+      all.push(...descPages, ...ascPages);
+
+      // Deduplicate by ID
+      const unique = new Map<number, RawPRWithUser>();
+      all.forEach((pr) => unique.set(pr.id, pr));
+      return Array.from(unique.values());
+    } else {
+      const pages = Math.min(Math.ceil((data.total_count - 100) / 100), 9);
+      const rest = await fetchPages(q, 2, pages, "desc");
+      all.push(...rest);
+    }
   }
 
   return all;
 }
+
+/* ── Supabase-cached fetch (mirrors pr-tracker pattern) ──────── */
+
+/**
+ * Fetches PRs for a repo with Supabase caching.
+ *
+ * Strategy:
+ * - Cache key is `owner/repo` in `pa_repos` table.
+ * - If last_synced_at < 1 minute ago, skip GitHub API and read from DB.
+ * - Otherwise, delta-sync: fetch only PRs updated since last sync.
+ * - Upsert new/changed PRs into `pa_pull_requests` table.
+ * - Read all PRs back from DB.
+ * - Falls back to direct GitHub fetch if Supabase is unavailable.
+ */
+async function fetchRepoPRs(owner: string, repo: string): Promise<RawPRWithUser[]> {
+  const baseQ = `label:"gssoc:approved" repo:${owner}/${repo} type:pr`;
+  const repoKey = `${owner}/${repo}`.toLowerCase();
+
+  // No Supabase? Fall back to direct GitHub API fetch.
+  if (!supabase) {
+    return fetchAllFromGitHub(baseQ);
+  }
+
+  // Check last sync time
+  const { data: repoRow } = await supabase
+    .from("pa_repos")
+    .select("last_synced_at")
+    .eq("repo_key", repoKey)
+    .single();
+
+  const now = new Date();
+  const lastSyncStr = repoRow?.last_synced_at;
+  const lastSync = lastSyncStr ? new Date(lastSyncStr) : null;
+  const timeSinceSync = lastSync ? now.getTime() - lastSync.getTime() : Infinity;
+
+  // 1 minute cache — prevents stampedes while keeping data fresh
+  if (timeSinceSync > 1 * 60 * 1000) {
+    let q = baseQ;
+    if (lastSync) {
+      q += ` updated:>${lastSync.toISOString()}`;
+    }
+
+    // Update timestamp IMMEDIATELY to prevent cache stampedes
+    if (!lastSync) {
+      await supabase.from("pa_repos").upsert({ repo_key: repoKey, last_synced_at: now.toISOString() });
+    } else {
+      await supabase.from("pa_repos").update({ last_synced_at: now.toISOString() }).eq("repo_key", repoKey);
+    }
+
+    let deltaPRs: RawPRWithUser[] = [];
+    try {
+      deltaPRs = await fetchAllFromGitHub(q);
+    } catch (err: any) {
+      console.warn(`[project-admin-tracker] Delta sync failed for ${repoKey}, falling back to DB:`, err.message);
+    }
+
+    if (deltaPRs.length > 0) {
+      const payload = deltaPRs.map((pr) => ({
+        id: pr.id,
+        repo_key: repoKey,
+        raw_data: pr,
+        updated_at: pr.updated_at,
+      }));
+
+      // Batch upsert in chunks of 100
+      for (let i = 0; i < payload.length; i += 100) {
+        await supabase.from("pa_pull_requests").upsert(payload.slice(i, i + 100), { onConflict: "id" });
+      }
+    }
+  }
+
+  // Read all cached PRs from Supabase
+  let dbPRs: any[] = [];
+  let page = 0;
+  const pageSize = 1000;
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from("pa_pull_requests")
+      .select("raw_data")
+      .eq("repo_key", repoKey)
+      .range(page * pageSize, (page + 1) * pageSize - 1);
+
+    if (error) {
+      console.error("Supabase error:", error);
+      return fetchAllFromGitHub(baseQ);
+    }
+
+    dbPRs.push(...data);
+    if (data.length < pageSize) {
+      hasMore = false;
+    } else {
+      page++;
+    }
+  }
+
+  return dbPRs.map((row: any) => row.raw_data as RawPRWithUser);
+}
+
+/* ── Point calculation ──────────────────────────────────────── */
 
 function calcPoints(labelNames: string[]) {
   const hasInvalid = labelNames.some((l) => INVALID_LABELS.includes(l));
@@ -160,10 +283,13 @@ function repoFromUrl(repositoryUrl: string) {
 
 /* ── Public API ──────────────────────────────────────────────── */
 
-async function _buildProjectAdminData(owner: string, repo: string): Promise<ProjectAdminData> {
+export async function buildProjectAdminData(owner: string, repo: string): Promise<ProjectAdminData> {
+  const ownerLc = owner.toLowerCase();
+  const repoLc = repo.toLowerCase();
+
   const [repoInfo, rawPRs] = await Promise.all([
-    fetchRepoInfo(owner, repo),
-    fetchRepoPRs(owner, repo),
+    fetchRepoInfo(ownerLc, repoLc),
+    fetchRepoPRs(ownerLc, repoLc),
   ]);
 
   const allPRs: ProjectAdminPR[] = rawPRs.map((pr) => {
@@ -209,10 +335,3 @@ async function _buildProjectAdminData(owner: string, repo: string): Promise<Proj
     fetchedAt: new Date().toISOString(),
   };
 }
-
-// Cache per owner+repo for 5 minutes — shared across all requests on the same deployment
-export const buildProjectAdminData = unstable_cache(
-  async (owner: string, repo: string) => _buildProjectAdminData(owner.toLowerCase(), repo.toLowerCase()),
-  ["project-admin-data"],
-  { revalidate: 300 }
-);
