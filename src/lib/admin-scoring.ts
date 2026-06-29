@@ -34,7 +34,7 @@ async function ghFetch(url: string) {
 }
 
 async function fetchRepoPRs(owner: string, repo: string): Promise<any[]> {
-  const q = `label:"gssoc:approved" repo:${owner}/${repo} type:pr`;
+  const q = `label:"gssoc:approved" repo:${owner}/${repo} type:pr is:merged`;
   const url = `https://api.github.com/search/issues?q=${encodeURIComponent(q)}&per_page=100&sort=created&order=desc`;
   const res = await ghFetch(url);
   if (res.status === 403 || res.status === 429) throw new Error("RATE_LIMITED");
@@ -102,8 +102,7 @@ export async function _buildAdminScore(owner: string, repo: string, adminUsernam
   ]);
 
   // 1. Merged PRs with gssoc:approved
-  // Note: search issues item has `pull_request` and `pull_request.merged_at` check
-  const mergedPRsCount = prs.filter((pr) => !!pr.pull_request?.merged_at || pr.state === "closed").length; 
+  const mergedPRsCount = prs.length; 
   const mergedPRsPoints = mergedPRsCount * 15;
 
   // 2. Labeled issues
@@ -149,8 +148,8 @@ export async function _buildAdminScore(owner: string, repo: string, adminUsernam
       }
     }
 
-    // Resolution boost: closed issues
-    if (issue.state === "closed" && issue.closed_at && issue.created_at) {
+    // Resolution boost: closed GSSoC issues
+    if (hasDifficulty && issue.state === "closed" && issue.closed_at && issue.created_at) {
       closedIssuesForBoost++;
       const created = new Date(issue.created_at).getTime();
       const closed = new Date(issue.closed_at).getTime();
