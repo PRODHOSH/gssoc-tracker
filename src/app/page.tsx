@@ -2,7 +2,7 @@
 import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, AlertCircle, Star, GitPullRequest, Users, ArrowLeft } from "lucide-react";
+import { Loader2, AlertCircle, Star, GitPullRequest, Users, ArrowLeft, FolderGit2 } from "lucide-react";
 import { ds, fontMono } from "@/lib/ds";
 import { GitHubIcon } from "@/components/icons";
 import { SubscribeButton } from "@/components/SubscribeModal";
@@ -11,7 +11,7 @@ import Image from "next/image";
 
 const REPO_URL = "https://github.com/PRODHOSH/gssoc-tracker";
 
-type Role = "contributor" | "mentor";
+type Role = "contributor" | "mentor" | "project-admin";
 
 const ROLES: { id: Role; icon: React.ReactNode; label: string; desc: string; border: string; bg: string; hoverBorder: string; hoverBg: string }[] = [
   {
@@ -29,6 +29,14 @@ const ROLES: { id: Role; icon: React.ReactNode; label: string; desc: string; bor
     desc: "Track PRs you've reviewed as a GSSoC mentor",
     border: "rgba(251,191,36,0.2)", bg: "rgba(251,191,36,0.05)",
     hoverBorder: "rgba(251,191,36,0.5)", hoverBg: "rgba(251,191,36,0.1)",
+  },
+  {
+    id: "project-admin",
+    icon: <FolderGit2 size={20} color="#818cf8" />,
+    label: "Project Admin",
+    desc: "Enter your repo to see contributor stats & scores",
+    border: "rgba(129,140,248,0.2)", bg: "rgba(129,140,248,0.05)",
+    hoverBorder: "rgba(129,140,248,0.5)", hoverBg: "rgba(129,140,248,0.1)",
   },
 ];
 
@@ -71,10 +79,26 @@ export default function Home() {
     setState("loading");
 
     try {
-      const res = await fetch(`https://api.github.com/users/${encodeURIComponent(raw)}`);
-      if (res.status === 404) { setErrMsg("GitHub user not found"); setState("error"); return; }
-      if (!res.ok) { setErrMsg("Couldn't reach GitHub. Try again."); setState("error"); return; }
-      router.push(role === "contributor" ? `/pr-tracker/${encodeURIComponent(raw)}` : `/mentor/${encodeURIComponent(raw)}`);
+      if (role === "project-admin") {
+        // Expect owner/repo format
+        const parts = raw.replace(/^https?:\/\/github\.com\//, "").split("/");
+        if (parts.length < 2 || !parts[0] || !parts[1]) {
+          setErrMsg("Enter a valid repo in owner/repo format (e.g. PRODHOSH/gssoc-tracker)");
+          setState("error");
+          return;
+        }
+        const [owner, repo] = parts;
+        // Verify repo exists
+        const res = await fetch(`https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`);
+        if (res.status === 404) { setErrMsg("Repository not found"); setState("error"); return; }
+        if (!res.ok) { setErrMsg("Couldn't reach GitHub. Try again."); setState("error"); return; }
+        router.push(`/project-admin/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`);
+      } else {
+        const res = await fetch(`https://api.github.com/users/${encodeURIComponent(raw)}`);
+        if (res.status === 404) { setErrMsg("GitHub user not found"); setState("error"); return; }
+        if (!res.ok) { setErrMsg("Couldn't reach GitHub. Try again."); setState("error"); return; }
+        router.push(role === "contributor" ? `/pr-tracker/${encodeURIComponent(raw)}` : `/mentor/${encodeURIComponent(raw)}`);
+      }
     } catch {
       setErrMsg("Couldn't reach the API. Try again.");
       setState("error");
@@ -82,6 +106,7 @@ export default function Home() {
   }
 
   const activeRole = ROLES.find((r) => r.id === role);
+  const isPA = role === "project-admin";
 
   return (
     <div className="dark" style={{
@@ -216,13 +241,16 @@ export default function Home() {
               <form onSubmit={submit} style={{ display: "flex", gap: 8 }}>
                 <div style={{ position: "relative", flex: 1 }}>
                   <div style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>
-                    <GitHubIcon width={14} height={14} style={{ color: "rgba(255,255,255,0.25)" }} />
+                    {isPA
+                      ? <FolderGit2 width={14} height={14} style={{ color: "rgba(255,255,255,0.25)" }} />
+                      : <GitHubIcon width={14} height={14} style={{ color: "rgba(255,255,255,0.25)" }} />
+                    }
                   </div>
                   <input
                     type="text"
                     value={input}
                     onChange={(e) => { setInput(e.target.value); setState("idle"); setErrMsg(""); }}
-                    placeholder="GitHub username…"
+                    placeholder={isPA ? "owner/repo (e.g. PRODHOSH/gssoc-tracker)" : "GitHub username…"}
                     autoFocus
                     autoComplete="off"
                     suppressHydrationWarning
@@ -237,7 +265,7 @@ export default function Home() {
                       transition: "border-color 0.15s",
                       boxSizing: "border-box",
                     }}
-                    onFocus={(e) => (e.currentTarget.style.borderColor = "rgba(62,207,142,0.45)")}
+                    onFocus={(e) => (e.currentTarget.style.borderColor = isPA ? "rgba(129,140,248,0.45)" : "rgba(62,207,142,0.45)")}
                     onBlur={(e) => (e.currentTarget.style.borderColor = state === "error" ? "rgba(248,113,113,0.5)" : "rgba(255,255,255,0.08)")}
                   />
                 </div>
@@ -248,8 +276,8 @@ export default function Home() {
                   style={{
                     height: 48, padding: "0 22px",
                     borderRadius: 10, border: "none",
-                    background: state === "loading" ? "rgba(62,207,142,0.55)" : ds.primary,
-                    color: ds.onPrimary, fontSize: 14, fontWeight: 600,
+                    background: state === "loading" ? (isPA ? "rgba(129,140,248,0.55)" : "rgba(62,207,142,0.55)") : (isPA ? "#818cf8" : ds.primary),
+                    color: isPA ? "#fff" : ds.onPrimary, fontSize: 14, fontWeight: 600,
                     cursor: state === "loading" || !input.trim() ? "not-allowed" : "pointer",
                     display: "flex", alignItems: "center", gap: 6, flexShrink: 0,
                     transition: "background 0.13s",
@@ -258,7 +286,7 @@ export default function Home() {
                 >
                   {state === "loading"
                     ? <><Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> Loading…</>
-                    : "Track →"}
+                    : isPA ? "View Stats →" : "Track →"}
                 </button>
               </form>
 
