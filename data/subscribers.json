@@ -178,5 +178,15 @@
     "lastScore": 9015,
     "lastRank": 277,
     "lastChecked": "2026-07-03T13:29:59.304Z"
+  },
+  {
+    "github": "kunal-9090",
+    "email": "kunalpattanaik9090@gmail.com",
+    "frequency": "on-change",
+    "token": "ec2f6ddece679c6fc308aafc55c54c68d8526489",
+    "addedAt": "2026-07-03T16:33:14.165Z",
+    "lastScore": null,
+    "lastRank": null,
+    "lastChecked": null
   }
 ]
