@@ -436,5 +436,107 @@
     "type": "daily_digest",
     "subject": "GSSoC Daily: Score 4,248 pts · Rank #699",
     "email_sent": true
+  },
+  {
+    "timestamp": "2026-06-29T07:13:09.104Z",
+    "type": "daily_digest",
+    "subject": "GSSoC Daily: Score 4,248 pts · Rank #699",
+    "email_sent": true
+  },
+  {
+    "timestamp": "2026-06-30T06:38:52.591Z",
+    "type": "daily_digest",
+    "subject": "GSSoC Daily: Score 4,248 pts · Rank #699",
+    "email_sent": true
+  },
+  {
+    "timestamp": "2026-07-01T06:52:06.293Z",
+    "type": "change_alert",
+    "subject": "GSSoC Alert: Score +513 pts · Rank #701",
+    "email_sent": true,
+    "changes": {
+      "rank_before": 699,
+      "rank_after": 701,
+      "score_before": 4248,
+      "score_after": 4761
+    }
+  },
+  {
+    "timestamp": "2026-07-01T06:52:07.202Z",
+    "type": "daily_digest",
+    "subject": "GSSoC Daily: Score 4,761 pts · Rank #701",
+    "email_sent": true
+  },
+  {
+    "timestamp": "2026-07-01T19:27:33.806Z",
+    "type": "change_alert",
+    "subject": "GSSoC Alert: Score +0 pts · Rank #700",
+    "email_sent": true,
+    "changes": {
+      "rank_before": 701,
+      "rank_after": 700,
+      "score_before": 4761,
+      "score_after": 4761
+    }
+  },
+  {
+    "timestamp": "2026-07-02T02:02:12.211Z",
+    "type": "change_alert",
+    "subject": "GSSoC Alert: Score +0 pts · Rank #699",
+    "email_sent": true,
+    "changes": {
+      "rank_before": 700,
+      "rank_after": 699,
+      "score_before": 4761,
+      "score_after": 4761
+    }
+  },
+  {
+    "timestamp": "2026-07-02T06:23:01.540Z",
+    "type": "change_alert",
+    "subject": "GSSoC Alert: Score +0 pts · Rank #700",
+    "email_sent": true,
+    "changes": {
+      "rank_before": 699,
+      "rank_after": 700,
+      "score_before": 4761,
+      "score_after": 4761
+    }
+  },
+  {
+    "timestamp": "2026-07-02T06:23:02.393Z",
+    "type": "daily_digest",
+    "subject": "GSSoC Daily: Score 4,761 pts · Rank #700",
+    "email_sent": true
+  },
+  {
+    "timestamp": "2026-07-02T13:26:10.949Z",
+    "type": "change_alert",
+    "subject": "GSSoC Alert: Score +0 pts · Rank #701",
+    "email_sent": true,
+    "changes": {
+      "rank_before": 700,
+      "rank_after": 701,
+      "score_before": 4761,
+      "score_after": 4761
+    }
+  },
+  {
+    "timestamp": "2026-07-03T06:09:03.394Z",
+    "type": "daily_digest",
+    "subject": "GSSoC Daily: Score 4,761 pts · Rank #701",
+    "email_sent": true
+  },
+  {
+    "timestamp": "2026-07-03T13:30:06.624Z",
+    "type": "change_alert",
+    "subject": "GSSoC Alert: Score +0 pts · Rank #699",
+    "email_sent": true,
+    "changes": {
+      "rank_before": 701,
+      "rank_after": 699,
+      "score_before": 4761,
+      "score_after": 4761
+    }
   }
 ]

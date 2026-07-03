@@ -3,28 +3,85 @@
 @import "shadcn/tailwind.css";
 
 @theme inline {
-  --color-canvas:       #ffffff;
-  --color-canvas-soft:  #fafafa;
-  --color-canvas-night: #1c1c1c;
   --color-primary:      #3ecf8e;
   --color-primary-deep: #24b47e;
-  --color-ink:          #171717;
-  --color-ink-mute:     #707070;
-  --color-hairline:     #dfdfdf;
-  --color-background:   #fafafa;
-  --color-foreground:   #171717;
-  --color-border:       #dfdfdf;
   --color-ring:         #3ecf8e;
   --radius:             8px;
   --font-sans: var(--font-geist-sans), "Helvetica Neue", Arial, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
+:root {
+  --color-canvas:       #ffffff;
+  --color-canvas-soft:  #fafafa;
+  --color-canvas-night: #1c1c1c;
+  --color-canvas-night-soft: #202020;
+  --color-ink:          #171717;
+  --color-ink-secondary: #212121;
+  --color-ink-mute:     #707070;
+  --color-ink-mute2:    #9a9a9a;
+  --color-ink-faint:    #b2b2b2;
+  --color-on-dark:      #ffffff;
+  --color-hairline:     #dfdfdf;
+  --color-hairline-strong: #c7c7c7;
+  --color-hairline-cool: #ededed;
+  --color-hairline-cool2: #efefef;
+  --color-scrollbar-thumb: #dfdfdf;
+  --color-scrollbar-hover: #c7c7c7;
+  --color-modal-bg: #ffffff;
+  --color-modal-border: #dfdfdf;
+  --color-modal-shadow: rgba(23,23,23,0.14);
+}
+
+.light {
+  --color-canvas:       #ffffff;
+  --color-canvas-soft:  #fafafa;
+  --color-canvas-night: #1c1c1c;
+  --color-canvas-night-soft: #202020;
+  --color-ink:          #171717;
+  --color-ink-secondary: #212121;
+  --color-ink-mute:     #707070;
+  --color-ink-mute2:    #9a9a9a;
+  --color-ink-faint:    #b2b2b2;
+  --color-on-dark:      #ffffff;
+  --color-hairline:     #dfdfdf;
+  --color-hairline-strong: #c7c7c7;
+  --color-hairline-cool: #ededed;
+  --color-hairline-cool2: #efefef;
+  --color-scrollbar-thumb: #dfdfdf;
+  --color-scrollbar-hover: #c7c7c7;
+  --color-modal-bg: #ffffff;
+  --color-modal-border: #dfdfdf;
+  --color-modal-shadow: rgba(23,23,23,0.14);
+}
+
+.dark {
+  --color-canvas:       #1c1c1c;
+  --color-canvas-soft:  #242424;
+  --color-canvas-night: #141414;
+  --color-canvas-night-soft: #1c1c1c;
+  --color-ink:          #ffffff;
+  --color-ink-secondary: #e5e5e5;
+  --color-ink-mute:     #a3a3a3;
+  --color-ink-mute2:    #737373;
+  --color-ink-faint:    #525252;
+  --color-on-dark:      #ffffff;
+  --color-hairline:     rgba(255,255,255,0.15);
+  --color-hairline-strong: rgba(255,255,255,0.25);
+  --color-hairline-cool: rgba(255,255,255,0.08);
+  --color-hairline-cool2: rgba(255,255,255,0.04);
+  --color-scrollbar-thumb: rgba(255,255,255,0.15);
+  --color-scrollbar-hover: rgba(255,255,255,0.25);
+  --color-modal-bg: #1c1c1c;
+  --color-modal-border: rgba(255,255,255,0.15);
+  --color-modal-shadow: rgba(0,0,0,0.5);
+}
+
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }
   html, body {
-    background-color: #fafafa;
-    color: #171717;
+    background-color: var(--color-canvas-soft);
+    color: var(--color-ink);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -34,8 +91,8 @@
 
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #dfdfdf; border-radius: 9999px; }
-::-webkit-scrollbar-thumb:hover { background: #c7c7c7; }
+::-webkit-scrollbar-thumb { background: var(--color-scrollbar-thumb); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-scrollbar-hover); }
 
 .modal-backdrop {
   position: fixed; inset: 0;
@@ -51,10 +108,10 @@
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 .modal-panel {
-  background: #fff;
-  border: 1px solid #dfdfdf;
+  background: var(--color-modal-bg);
+  border: 1px solid var(--color-modal-border);
   border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(23,23,23,0.14);
+  box-shadow: 0 20px 60px var(--color-modal-shadow);
   width: 100%; max-width: 520px; max-height: 90vh;
   overflow-y: auto;
   animation: modal-in 0.18s ease forwards;

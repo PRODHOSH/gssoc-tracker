@@ -103,6 +103,7 @@ function Section({ title, rows, isMultiplier = false, accent, footnote }: {
 function Modal({ onClose }: { onClose: () => void }) {
   return createPortal(
     <div
+      className="light"
       onClick={onClose}
       style={{
         position: "fixed", inset: 0,

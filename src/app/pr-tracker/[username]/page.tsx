@@ -13,6 +13,7 @@ import type { Metadata } from "next";
 import { NpsFeedback } from "@/components/NpsFeedback";
 import { StarNudge } from "@/components/StarNudge";
 import { GSSOC_REPO_SET } from "@/data/gssoc-repos";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const dynamic = "force-dynamic";
 
@@ -87,7 +88,7 @@ export default async function PRTrackerDashboard({ params }: Props) {
   );
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f5f5f5", fontFamily: "var(--font-sans)" }}>
+    <div style={{ minHeight: "100vh", background: ds.canvasSoft, fontFamily: "var(--font-sans)" }}>
       <NpsFeedback />
       <StarNudge username={decoded} />
       {/* ── Sticky nav ── */}
@@ -168,6 +169,8 @@ export default async function PRTrackerDashboard({ params }: Props) {
           >
             <Star size={11} /> Star
           </a>
+
+          <ThemeToggle />
         </div>
       </div>
 
@@ -299,7 +302,7 @@ function ErrorPage({ username, code }: { username: string; code: string }) {
   const isRateLimit = code === "RATE_LIMITED";
   return (
     <div style={{
-      minHeight: "100vh", background: "#f5f5f5",
+      minHeight: "100vh", background: ds.canvasSoft,
       display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
       fontFamily: "var(--font-sans)", padding: 24,
     }}>

@@ -117,9 +117,9 @@ export default function Home() {
   const isPA = role === "project-admin";
 
   return (
-    <div style={{
+    <div className="dark" style={{
       minHeight: "100vh",
-      background: ds.canvasNight,
+      background: "var(--color-canvas-night)",
       display: "flex", flexDirection: "column",
       alignItems: "center",
       fontFamily: "var(--font-sans)",

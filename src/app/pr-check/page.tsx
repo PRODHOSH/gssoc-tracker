@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { ds, fontMono } from "@/lib/ds";
 import { PrChecker } from "@/components/PrChecker";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const metadata: Metadata = {
   title: "PR Validator · GSSoC Tracker",
@@ -23,8 +24,7 @@ export default function PrCheckPage() {
       fontFamily: "var(--font-sans)",
       padding: "0 24px 80px",
     }}>
-      {/* Nav */}
-      <div style={{ maxWidth: 640, margin: "0 auto", padding: "22px 0 0" }}>
+      <div style={{ maxWidth: 640, margin: "0 auto", padding: "22px 0 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Link
           href="/"
           style={{
@@ -35,6 +35,7 @@ export default function PrCheckPage() {
         >
           <ArrowLeft size={13} /> Home
         </Link>
+        <ThemeToggle />
       </div>
 
       <div style={{ maxWidth: 640, margin: "36px auto 0" }}>

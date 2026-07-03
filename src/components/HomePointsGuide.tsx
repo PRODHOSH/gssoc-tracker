@@ -213,6 +213,7 @@ function Modal({ onClose }: { onClose: () => void }) {
 
   return createPortal(
     <div
+      className="light"
       onClick={onClose}
       style={{ position: "fixed", inset: 0, background: "rgba(23,23,23,0.45)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
     >

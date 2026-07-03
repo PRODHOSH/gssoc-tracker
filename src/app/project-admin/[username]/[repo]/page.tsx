@@ -7,6 +7,7 @@ import { buildProjectAdminData } from "@/lib/project-admin-tracker";
 import { buildAdminScore } from "@/lib/admin-scoring";
 import { ProjectPRTable } from "@/components/project-admin/ProjectPRTable";
 import { AdminScoringGuide } from "@/components/project-admin/AdminScoringGuide";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const dynamic = "force-dynamic";
 
@@ -48,10 +49,10 @@ export default async function ProjectAdminPage({ params }: Props) {
   });
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f5f5f5", fontFamily: "var(--font-sans)" }}>
+    <div style={{ minHeight: "100vh", background: ds.canvasSoft, fontFamily: "var(--font-sans)" }}>
       {/* ── Sticky nav ── */}
       <div style={{
-        background: "rgba(255,255,255,0.9)", backdropFilter: "blur(12px)",
+        background: ds.canvas, backdropFilter: "blur(12px)",
         WebkitBackdropFilter: "blur(12px)",
         borderBottom: `1px solid ${ds.hairlineCool}`,
         padding: "0 24px", height: 52,
@@ -87,6 +88,10 @@ export default async function ProjectAdminPage({ params }: Props) {
           <a href={`/project-admin/${owner}/${repo}`} style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 11px", borderRadius: ds.rSm, border: `1px solid ${ds.hairlineCool}`, fontSize: 12, fontWeight: 500, color: ds.inkMute, textDecoration: "none", background: ds.canvas }}>
             <RefreshCw size={11} /> Refresh
           </a>
+          <a href="https://github.com/PRODHOSH/gssoc-tracker" target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: ds.rSm, border: "1px solid rgba(202,138,4,0.3)", fontSize: 12, fontWeight: 600, color: "#92400e", textDecoration: "none", background: "rgba(251,191,36,0.07)" }}>
+            <Star size={11} /> Star
+          </a>
+          <ThemeToggle />
         </div>
       </div>
 
@@ -231,7 +236,7 @@ function StatCard({ icon, label, value, sub, accent, accentBg }: {
 function ErrorPage({ owner, repo, code }: { owner: string; repo: string; code: string }) {
   const isRateLimit = code === "RATE_LIMITED";
   return (
-    <div style={{ minHeight: "100vh", background: "#f5f5f5", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-sans)", padding: 24 }}>
+    <div style={{ minHeight: "100vh", background: ds.canvasSoft, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-sans)", padding: 24 }}>
       <div style={{ background: ds.canvas, border: `1px solid ${ds.hairlineCool}`, borderRadius: ds.rXl, padding: "44px 52px", textAlign: "center", maxWidth: 460, boxShadow: "0 4px 24px rgba(23,23,23,0.08)" }}>
         <div style={{ width: 48, height: 48, borderRadius: 14, background: isRateLimit ? "rgba(245,158,11,0.1)" : "rgba(239,68,68,0.1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
           <AlertTriangle size={22} color={isRateLimit ? "#f59e0b" : "#ef4444"} />

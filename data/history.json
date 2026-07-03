@@ -228,5 +228,53 @@
     "role_scores": {},
     "rank_change": 295,
     "score_change": 25
+  },
+  {
+    "timestamp": "2026-07-01T06:52:05.222Z",
+    "rank": 701,
+    "score": 4761,
+    "role_scores": {},
+    "rank_change": 2,
+    "score_change": 513
+  },
+  {
+    "timestamp": "2026-07-01T19:27:32.614Z",
+    "rank": 700,
+    "score": 4761,
+    "role_scores": {},
+    "rank_change": -1,
+    "score_change": 0
+  },
+  {
+    "timestamp": "2026-07-02T02:02:10.519Z",
+    "rank": 699,
+    "score": 4761,
+    "role_scores": {},
+    "rank_change": -1,
+    "score_change": 0
+  },
+  {
+    "timestamp": "2026-07-02T06:23:00.400Z",
+    "rank": 700,
+    "score": 4761,
+    "role_scores": {},
+    "rank_change": 1,
+    "score_change": 0
+  },
+  {
+    "timestamp": "2026-07-02T13:26:09.345Z",
+    "rank": 701,
+    "score": 4761,
+    "role_scores": {},
+    "rank_change": 1,
+    "score_change": 0
+  },
+  {
+    "timestamp": "2026-07-03T13:30:05.694Z",
+    "rank": 699,
+    "score": 4761,
+    "role_scores": {},
+    "rank_change": -2,
+    "score_change": 0
   }
 ]

@@ -4,29 +4,29 @@
  */
 export const ds = {
   /* Surfaces */
-  canvas:           "#ffffff",
-  canvasSoft:       "#fafafa",
-  canvasNight:      "#1c1c1c",
-  canvasNightSoft:  "#202020",
+  canvas:           "var(--color-canvas)",
+  canvasSoft:       "var(--color-canvas-soft)",
+  canvasNight:      "var(--color-canvas-night)",
+  canvasNightSoft:  "var(--color-canvas-night-soft)",
 
   /* Brand — the single chromatic event */
-  primary:          "#3ecf8e",
-  primaryDeep:      "#24b47e",
+  primary:          "var(--color-primary)",
+  primaryDeep:      "var(--color-primary-deep)",
 
   /* Text */
-  ink:              "#171717",
-  inkSecondary:     "#212121",
-  inkMute:          "#707070",
-  inkMute2:         "#9a9a9a",
-  inkFaint:         "#b2b2b2",
+  ink:              "var(--color-ink)",
+  inkSecondary:     "var(--color-ink-secondary)",
+  inkMute:          "var(--color-ink-mute)",
+  inkMute2:         "var(--color-ink-mute2)",
+  inkFaint:         "var(--color-ink-faint)",
   onPrimary:        "#171717",   // dark text ON green
-  onDark:           "#ffffff",
+  onDark:           "var(--color-on-dark)",
 
   /* Borders */
-  hairline:         "#dfdfdf",
-  hairlineStrong:   "#c7c7c7",
-  hairlineCool:     "#ededed",
-  hairlineCool2:    "#efefef",
+  hairline:         "var(--color-hairline)",
+  hairlineStrong:   "var(--color-hairline-strong)",
+  hairlineCool:     "var(--color-hairline-cool)",
+  hairlineCool2:    "var(--color-hairline-cool2)",
 
   /* Radius */
   rXs:  4,
