@@ -34,7 +34,7 @@ const ROLES: { id: Role; icon: React.ReactNode; label: string; desc: string; bor
     id: "project-admin",
     icon: <FolderGit2 size={20} color="#818cf8" />,
     label: "Project Admin",
-    desc: "Enter your repo to see contributor stats & scores",
+    desc: "Track issues, PRs & admin activity for your GSSoC project",
     border: "rgba(129,140,248,0.2)", bg: "rgba(129,140,248,0.05)",
     hoverBorder: "rgba(129,140,248,0.5)", hoverBg: "rgba(129,140,248,0.1)",
   },
@@ -80,21 +80,29 @@ export default function Home() {
 
     try {
       if (role === "project-admin") {
-        // Expect owner/repo format
-        const parts = raw.replace(/^https?:\/\/github\.com\//, "").split("/");
-        if (parts.length < 2 || !parts[0] || !parts[1]) {
-          setErrMsg("Enter a valid repo in owner/repo format (e.g. PRODHOSH/gssoc-tracker)");
-          setState("error");
-          return;
+        if (raw.includes("/")) {
+          // Expect owner/repo format
+          const parts = raw.replace(/^https?:\/\/github\.com\//, "").split("/");
+          if (parts.length < 2 || !parts[0] || !parts[1]) {
+            setErrMsg("Enter a valid repo in owner/repo format (e.g. PRODHOSH/gssoc-tracker)");
+            setState("error");
+            return;
+          }
+          const [owner, repo] = parts;
+          // Verify repo exists
+          const res = await fetch(`https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`);
+          if (res.status === 404) { setErrMsg("Repository not found"); setState("error"); return; }
+          if (!res.ok) { setErrMsg("Couldn't reach GitHub. Try again."); setState("error"); return; }
+          router.push(`/project-admin/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`);
+        } else {
+          // Verify user exists using the server API
+          const res = await fetch(`/api/github-user?username=${encodeURIComponent(raw)}`);
+          if (res.status === 404) { setErrMsg("GitHub user not found"); setState("error"); return; }
+          if (!res.ok) { setErrMsg("Couldn't reach GitHub. Try again."); setState("error"); return; }
+          router.push(`/project-admin/${encodeURIComponent(raw)}`);
         }
-        const [owner, repo] = parts;
-        // Verify repo exists
-        const res = await fetch(`https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`);
-        if (res.status === 404) { setErrMsg("Repository not found"); setState("error"); return; }
-        if (!res.ok) { setErrMsg("Couldn't reach GitHub. Try again."); setState("error"); return; }
-        router.push(`/project-admin/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`);
       } else {
-        const res = await fetch(`https://api.github.com/users/${encodeURIComponent(raw)}`);
+        const res = await fetch(`/api/github-user?username=${encodeURIComponent(raw)}`);
         if (res.status === 404) { setErrMsg("GitHub user not found"); setState("error"); return; }
         if (!res.ok) { setErrMsg("Couldn't reach GitHub. Try again."); setState("error"); return; }
         router.push(role === "contributor" ? `/pr-tracker/${encodeURIComponent(raw)}` : `/mentor/${encodeURIComponent(raw)}`);
@@ -250,7 +258,7 @@ export default function Home() {
                     type="text"
                     value={input}
                     onChange={(e) => { setInput(e.target.value); setState("idle"); setErrMsg(""); }}
-                    placeholder={isPA ? "owner/repo (e.g. PRODHOSH/gssoc-tracker)" : "GitHub username…"}
+                    placeholder={isPA ? "owner/repo or admin username…" : "GitHub username…"}
                     autoFocus
                     autoComplete="off"
                     suppressHydrationWarning

@@ -230,9 +230,9 @@ function ErrorPage({ username, code }: { username: string; code: string }) {
         <p style={{ margin: "0 0 28px", fontSize: 14, color: ds.inkMute, lineHeight: 1.65 }}>
           {isRateLimit ? "GitHub API rate limit exceeded. Try again in a few minutes." : `Failed to fetch mentor data for @${username}.`}
         </p>
-        <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 20px", borderRadius: ds.rSm, background: ds.primary, color: ds.onPrimary, textDecoration: "none", fontSize: 14, fontWeight: 600 }}>
-          <ArrowLeft size={14} /> Try again
-        </Link>
+        <a href="" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 20px", borderRadius: ds.rSm, background: ds.primary, color: ds.onPrimary, textDecoration: "none", fontSize: 14, fontWeight: 600 }}>
+          <RefreshCw size={14} /> Try again
+        </a>
       </div>
     </div>
   );

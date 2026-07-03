@@ -301,6 +301,9 @@ export async function buildProjectAdminData(owner: string, repo: string): Promis
     const { name: repoName, url: repoUrl } = repoFromUrl(pr.repository_url);
     const calc = calcPoints(labelNames);
 
+    // Only merged PRs earn points — open/closed PRs show 0
+    const finalCalc = isMerged ? calc : { ...calc, isValid: false, points: 0 };
+
     return {
       id: pr.id,
       number: pr.number,
@@ -316,7 +319,7 @@ export async function buildProjectAdminData(owner: string, repo: string): Promis
       author: pr.user.login,
       authorUrl: `https://github.com/${pr.user.login}`,
       authorAvatar: pr.user.avatar_url,
-      ...calc,
+      ...finalCalc,
     };
   });
 
@@ -335,3 +338,4 @@ export async function buildProjectAdminData(owner: string, repo: string): Promis
     fetchedAt: new Date().toISOString(),
   };
 }
+

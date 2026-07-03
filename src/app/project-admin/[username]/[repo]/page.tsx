@@ -1,17 +1,17 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, FolderGit2, Clock, AlertTriangle, Star, RefreshCw, GitFork, ExternalLink } from "lucide-react";
+import { ArrowLeft, FolderGit2, Clock, AlertTriangle, Star, RefreshCw, GitFork, ExternalLink, Trophy, GitMerge, Tag, Info } from "lucide-react";
 import { ds, fontMono } from "@/lib/ds";
 import { buildProjectAdminData } from "@/lib/project-admin-tracker";
-import { ProjectStatsGrid } from "@/components/project-admin/ProjectStatsGrid";
+import { buildAdminScore } from "@/lib/admin-scoring";
 import { ProjectPRTable } from "@/components/project-admin/ProjectPRTable";
-import { ScoringGuide } from "@/components/pr-tracker/ScoringGuide";
+import { AdminScoringGuide } from "@/components/project-admin/AdminScoringGuide";
 
 export const dynamic = "force-dynamic";
 
 interface Props {
-  params: Promise<{ owner: string; repo: string }>;
+  params: Promise<{ username: string; repo: string }>;
 }
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
@@ -23,13 +23,16 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 }
 
 export default async function ProjectAdminPage({ params }: Props) {
-  const { owner, repo } = await params;
+  const { username, repo } = await params;
+  const owner = username;
 
   let data = null as Awaited<ReturnType<typeof buildProjectAdminData>> | null;
+  let adminScore = null as Awaited<ReturnType<typeof buildAdminScore>> | null;
   let errorCode: string | null = null;
 
   try {
     data = await buildProjectAdminData(owner, repo);
+    adminScore = await buildAdminScore(owner, repo, owner);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "";
     if (msg === "REPO_NOT_FOUND") return notFound();
@@ -37,7 +40,7 @@ export default async function ProjectAdminPage({ params }: Props) {
   }
 
   if (errorCode) return <ErrorPage owner={owner} repo={repo} code={errorCode} />;
-  if (!data) return notFound();
+  if (!data || !adminScore) return notFound();
 
   const fetchedDate = new Date(data.fetchedAt).toLocaleString("en-IN", {
     month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
@@ -66,24 +69,23 @@ export default async function ProjectAdminPage({ params }: Props) {
               <FolderGit2 size={12} color="#818cf8" />
             </div>
             <span style={{ fontSize: 14, fontWeight: 700, color: ds.ink, letterSpacing: "-0.01em" }}>
-              Project Admin Tracker
+              PA Activity Tracker
             </span>
             <span style={{ fontSize: 12, color: ds.inkMute2, fontFamily: fontMono, background: ds.canvasSoft, padding: "1px 7px", borderRadius: ds.rFull, border: `1px solid ${ds.hairlineCool}` }}>
               {owner}/{repo}
             </span>
-            <ScoringGuide />
           </div>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Link href={`/project-admin/${encodeURIComponent(owner)}`} style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, color: "#4f46e5", textDecoration: "none", padding: "5px 11px", borderRadius: ds.rSm, border: "1px solid rgba(79,70,229,0.2)", background: "rgba(79,70,229,0.03)" }}>
+            Admin Profile
+          </Link>
           <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, color: ds.inkFaint }}>
             <Clock size={10} /> {fetchedDate}
           </span>
           <a href={`/project-admin/${owner}/${repo}`} style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 11px", borderRadius: ds.rSm, border: `1px solid ${ds.hairlineCool}`, fontSize: 12, fontWeight: 500, color: ds.inkMute, textDecoration: "none", background: ds.canvas }}>
             <RefreshCw size={11} /> Refresh
-          </a>
-          <a href="https://github.com/PRODHOSH/gssoc-tracker" target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: ds.rSm, border: "1px solid rgba(202,138,4,0.3)", fontSize: 12, fontWeight: 600, color: "#92400e", textDecoration: "none", background: "rgba(251,191,36,0.07)" }}>
-            <Star size={11} /> Star
           </a>
         </div>
       </div>
@@ -125,12 +127,12 @@ export default async function ProjectAdminPage({ params }: Props) {
               </div>
 
               {/* Points box */}
-              <div style={{ padding: "10px 18px", background: "rgba(62,207,142,0.06)", border: "1.5px solid rgba(62,207,142,0.2)", borderRadius: ds.rLg, textAlign: "center", minWidth: 120, flexShrink: 0 }}>
-                <p style={{ margin: "0 0 1px", fontSize: 10, fontWeight: 700, color: ds.inkMute2, letterSpacing: "0.1em", textTransform: "uppercase" }}>Total Points</p>
-                <p style={{ margin: 0, fontSize: 28, fontWeight: 800, color: ds.primaryDeep, fontFamily: fontMono, lineHeight: 1.1, letterSpacing: "-0.02em" }}>
-                  {data.totalPoints.toLocaleString()}
+              <div style={{ padding: "10px 18px", background: "rgba(99,102,241,0.06)", border: "1.5px solid rgba(99,102,241,0.2)", borderRadius: ds.rLg, textAlign: "center", minWidth: 120, flexShrink: 0 }}>
+                <p style={{ margin: "0 0 1px", fontSize: 10, fontWeight: 700, color: ds.inkMute2, letterSpacing: "0.1em", textTransform: "uppercase" }}>Admin Points</p>
+                <p style={{ margin: 0, fontSize: 28, fontWeight: 800, color: "#4f46e5", fontFamily: fontMono, lineHeight: 1.1, letterSpacing: "-0.02em" }}>
+                  {adminScore.total.toLocaleString()}
                 </p>
-                <p style={{ margin: "3px 0 0", fontSize: 10, color: ds.inkMute2 }}>awarded to contributors</p>
+                <p style={{ margin: "3px 0 0", fontSize: 10, color: ds.inkMute2 }}>earned by @{owner}</p>
               </div>
             </div>
 
@@ -157,8 +159,13 @@ export default async function ProjectAdminPage({ params }: Props) {
           </div>
         </div>
 
-        {/* Stats */}
-        <ProjectStatsGrid data={data} />
+        {/* Stats Grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 10, marginBottom: 16 }}>
+          <StatCard icon={<Trophy size={14} />} label="Total Points" value={adminScore.total} sub="points earned" accent="#4f46e5" accentBg="rgba(99,102,241,0.07)" />
+          <StatCard icon={<GitMerge size={14} />} label="Merged PRs" value={adminScore.mergedPRsCount} sub="+15 pts each" accent={ds.primaryDeep} accentBg="rgba(62,207,142,0.07)" />
+          <StatCard icon={<Tag size={14} />} label="Labeled Issues" value={adminScore.labeledIssuesFullCount + adminScore.labeledIssuesDiffCount} sub="+10 / +5 pts each" accent="#f59e0b" accentBg="rgba(245,158,11,0.07)" />
+          <StatCard icon={<FolderGit2 size={14} />} label="Opened Issues" value={adminScore.openedIssuesBeginnerCount + adminScore.openedIssuesOtherCount} sub={`by @${owner} (+8 / +3)`} accent="#8b5cf6" accentBg="rgba(139,92,246,0.07)" />
+        </div>
 
         {/* Empty state */}
         {data.allPRs.length === 0 && (
@@ -177,21 +184,9 @@ export default async function ProjectAdminPage({ params }: Props) {
           <ProjectPRTable prs={data.allPRs} />
         </div>
 
-        {/* Formula note */}
-        <div style={{ background: ds.canvas, border: `1px solid ${ds.hairlineCool}`, borderLeft: `3px solid rgba(62,207,142,0.4)`, borderRadius: ds.rMd, padding: "12px 16px", marginBottom: 32 }}>
-          <p style={{ margin: 0, fontSize: 12, color: ds.inkMute2, lineHeight: 1.7 }}>
-            <strong style={{ color: ds.inkMute, fontSize: 12 }}>Scoring formula</strong>
-            {"  "}
-            <code style={{ fontFamily: fontMono, fontSize: 11, background: "#f0fdf4", color: "#166534", padding: "1px 6px", borderRadius: 4 }}>
-              50 + (difficulty × quality) + type_bonus
-            </code>
-            {"  ·  "}
-            PRs tagged{" "}
-            {["gssoc:invalid", "gssoc:spam", "gssoc:ai-slop"].map((l) => (
-              <code key={l} style={{ fontFamily: fontMono, fontSize: 11, background: "#fef2f2", color: "#991b1b", padding: "1px 5px", borderRadius: 4, marginRight: 4 }}>{l}</code>
-            ))}
-            earn 0 pts.
-          </p>
+        {/* Scoring Guide */}
+        <div style={{ marginBottom: 32 }}>
+          <AdminScoringGuide />
         </div>
 
         <p style={{ textAlign: "center", fontSize: 12, color: ds.inkFaint, lineHeight: 1.7 }}>
@@ -199,6 +194,36 @@ export default async function ProjectAdminPage({ params }: Props) {
           <a href="/terms" style={{ color: ds.inkMute2, textDecoration: "underline" }}>Terms &amp; Privacy</a>
         </p>
       </div>
+    </div>
+  );
+}
+
+function StatCard({ icon, label, value, sub, accent, accentBg }: {
+  icon: React.ReactNode; label: string;
+  value: string | number; sub?: string;
+  accent: string; accentBg: string;
+}) {
+  return (
+    <div style={{
+      background: ds.canvas, border: `1px solid ${ds.hairlineCool}`,
+      borderRadius: ds.rLg, padding: "16px 18px",
+      boxShadow: "0 1px 4px rgba(23,23,23,0.04)",
+      borderLeft: `3px solid ${accent}`,
+      position: "relative", overflow: "hidden",
+    }}>
+      <div style={{ position: "absolute", top: 0, right: 0, width: 80, height: 80, background: accentBg, borderRadius: "0 0 0 80px", pointerEvents: "none" }} />
+      <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 12, position: "relative" }}>
+        <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: ds.rSm, background: accentBg, color: accent, flexShrink: 0 }}>
+          {icon}
+        </span>
+        <span style={{ fontSize: 11, fontWeight: 700, color: ds.inkMute2, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+          {label}
+        </span>
+      </div>
+      <p style={{ margin: 0, fontSize: 28, fontWeight: 800, color: ds.ink, fontFamily: fontMono, lineHeight: 1, letterSpacing: "-0.02em", position: "relative" }}>
+        {typeof value === "number" ? value.toLocaleString() : value}
+      </p>
+      {sub && <p style={{ margin: "6px 0 0", fontSize: 11, color: ds.inkMute2, position: "relative" }}>{sub}</p>}
     </div>
   );
 }
@@ -219,9 +244,9 @@ function ErrorPage({ owner, repo, code }: { owner: string; repo: string; code: s
             ? "GitHub API rate limit exceeded. Try again in a few minutes."
             : `Failed to fetch data for ${owner}/${repo}.`}
         </p>
-        <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 20px", borderRadius: ds.rSm, background: ds.primary, color: ds.onPrimary, textDecoration: "none", fontSize: 14, fontWeight: 600 }}>
-          <ArrowLeft size={14} /> Try again
-        </Link>
+        <a href="" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 20px", borderRadius: ds.rSm, background: ds.primary, color: ds.onPrimary, textDecoration: "none", fontSize: 14, fontWeight: 600 }}>
+          <RefreshCw size={14} /> Try again
+        </a>
       </div>
     </div>
   );
