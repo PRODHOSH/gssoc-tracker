@@ -180,39 +180,55 @@ export async function fetchGSSoCPRs(rawUsername: string): Promise<RawGitHubPR[]>
 
   // 1 minute cache for near-instant updates while preventing rate limit crashes
   if (timeSinceSync > 1 * 60 * 1000) {
+    const isFullSync = !lastSync || timeSinceSync > 24 * 60 * 60 * 1000;
     let q = baseQ;
-    // If we haven't synced in 24 hours, ignore delta and do a full baseline sync to catch removed labels.
-    if (lastSync && timeSinceSync < 24 * 60 * 60 * 1000) {
+
+    if (!isFullSync) {
       // Subtract 10 minutes to overlap the search window, catching GitHub indexing delays
-      const overlapTime = new Date(lastSync.getTime() - 10 * 60 * 1000);
+      const overlapTime = new Date(lastSync!.getTime() - 10 * 60 * 1000);
       q += ` updated:>${overlapTime.toISOString()}`;
     }
-    
-    let deltaPRs: RawGitHubPR[] = [];
-    try {
-      deltaPRs = await fetchAllFromGitHub(q);
-      
-      // Update timestamp AFTER successful fetch to prevent data loss on failure
-      if (!lastSync) {
-        await supabase.from("users").upsert({ github_login: username, last_synced_at: now.toISOString() });
-      } else {
-        await supabase.from("users").update({ last_synced_at: now.toISOString() }).eq("github_login", username);
-      }
-    } catch (err: any) {
-      console.warn(`[pr-tracker] Delta sync failed for ${username}, falling back to DB:`, err.message);
-    }
 
-    if (deltaPRs.length > 0) {
-      const payload = deltaPRs.map((pr) => ({
-        id: pr.id,
-        github_login: username,
-        raw_data: pr,
-        updated_at: pr.updated_at
-      }));
-      
-      for (let i = 0; i < payload.length; i += 100) {
-        await supabase.from("pull_requests").upsert(payload.slice(i, i + 100), { onConflict: 'id' });
+    // Stampede lock: set timestamp 2 min in the future to block concurrent requests.
+    // If everything fails, this lock naturally expires and the system self-heals.
+    const lockTime = new Date(now.getTime() + 2 * 60 * 1000);
+    await supabase.from("users").upsert({ github_login: username, last_synced_at: lockTime.toISOString() });
+
+    try {
+      const deltaPRs = await fetchAllFromGitHub(q);
+
+      // Full baseline sync: wipe existing PRs to purge stale data (e.g. removed labels)
+      if (isFullSync) {
+        await supabase.from("pull_requests").delete().eq("github_login", username);
       }
+
+      // Upsert fetched PRs into the database
+      if (deltaPRs.length > 0) {
+        const payload = deltaPRs.map((pr) => ({
+          id: pr.id,
+          github_login: username,
+          raw_data: pr,
+          updated_at: pr.updated_at
+        }));
+
+        for (let i = 0; i < payload.length; i += 100) {
+          await supabase.from("pull_requests").upsert(payload.slice(i, i + 100), { onConflict: 'id' });
+        }
+      }
+
+      // Everything succeeded: set the real timestamp
+      await supabase.from("users").update({ last_synced_at: now.toISOString() }).eq("github_login", username);
+    } catch (err: any) {
+      console.warn(`[pr-tracker] Sync failed for ${username}, falling back to DB:`, err.message);
+      // Best-effort: roll back the lock so it retries next time.
+      // If this also fails, the lock expires in 2 minutes anyway.
+      try {
+        if (lastSync) {
+          await supabase.from("users").update({ last_synced_at: lastSync.toISOString() }).eq("github_login", username);
+        } else {
+          await supabase.from("users").delete().eq("github_login", username);
+        }
+      } catch { /* lock will self-heal in 2 minutes */ }
     }
   }
 
@@ -271,6 +287,9 @@ async function fetchAllFromGitHub(q: string): Promise<RawGitHubPR[]> {
 
   if (data.total_count > 100) {
     if (data.total_count > 1000) {
+      if (data.total_count > 2000) {
+        console.warn(`[pr-tracker] WARNING: Query returned ${data.total_count} results, exceeding the 2000-PR limit. Some PRs will be missing. Query: ${q}`);
+      }
       // ASC/DESC hack to grab up to 2000 PRs
       const [descPages, ascPages] = await Promise.all([
         fetchPages(q, 2, 9, "desc"),
