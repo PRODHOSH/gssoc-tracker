@@ -184,16 +184,16 @@ export async function fetchGSSoCPRs(username: string): Promise<RawGitHubPR[]> {
       q += ` updated:>${lastSync.toISOString()}`;
     }
     
-    // Update timestamp IMMEDIATELY to prevent Cache Stampedes from concurrent visitors
-    if (!lastSync) {
-      await supabase.from("users").upsert({ github_login: username, last_synced_at: now.toISOString() });
-    } else {
-      await supabase.from("users").update({ last_synced_at: now.toISOString() }).eq("github_login", username);
-    }
-
     let deltaPRs: RawGitHubPR[] = [];
     try {
       deltaPRs = await fetchAllFromGitHub(q);
+      
+      // Update timestamp AFTER successful fetch to prevent data loss on failure
+      if (!lastSync) {
+        await supabase.from("users").upsert({ github_login: username, last_synced_at: now.toISOString() });
+      } else {
+        await supabase.from("users").update({ last_synced_at: now.toISOString() }).eq("github_login", username);
+      }
     } catch (err: any) {
       console.warn(`[pr-tracker] Delta sync failed for ${username}, falling back to DB:`, err.message);
     }
