@@ -11,12 +11,19 @@ async function syncRepos() {
     const repos = data.projects.map((p: any) => p.owner_repo.toLowerCase());
     
     // Manual overrides for repos that were renamed on GitHub but not updated in GSSoC API
-    const MANUAL_OVERRIDES = [
-      "chetan0e/verath" // Previously chetan0e/secondbrain
+    const MANUAL_ADDITIONS = [
+      "chetan0e/verath",     // Previously chetan0e/secondbrain
+      "omnyx-os/omnyx-os",   // Previously nagadevikona20-max/omnyx
     ];
+
+    const MANUAL_EXCLUSIONS = new Set([
+      "nagadevikona20-max/omnyx", // Replaced by omnyx-os/omnyx-os
+    ]);
     
-    // Combine and deduplicate
-    const uniqueRepos = Array.from(new Set([...repos, ...MANUAL_OVERRIDES])).sort();
+    // Combine, filter exclusions, and deduplicate
+    const uniqueRepos = Array.from(new Set([...repos, ...MANUAL_ADDITIONS]))
+      .filter(repo => !MANUAL_EXCLUSIONS.has(repo))
+      .sort();
     
     const content = `// All ${uniqueRepos.length} officially registered GSSoC 2026 projects
 // Source: https://gssoc.girlscript.org/api/projects
