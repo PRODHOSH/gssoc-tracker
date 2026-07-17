@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import type { RawGitHubPR } from "@/types/pr-tracker";
 
@@ -120,6 +121,7 @@ async function fetchRepoPRs(owner: string, repo: string): Promise<RawPRWithUser[
       Array.from({ length: pages }, async (_, i) => {
         const pageUrl = `https://api.github.com/search/issues?q=${encodeURIComponent(q)}&per_page=100&page=${i + 2}&sort=created&order=desc`;
         const r = await ghFetch(pageUrl);
+        if (r.status === 403 || r.status === 429) throw new Error("RATE_LIMITED");
         if (!r.ok) return [] as RawPRWithUser[];
         const d = await r.json() as { items: RawPRWithUser[] };
         return d.items;
@@ -211,8 +213,10 @@ async function _buildProjectAdminData(owner: string, repo: string): Promise<Proj
 }
 
 // Cache per owner+repo for 5 minutes — shared across all requests on the same deployment
-export const buildProjectAdminData = unstable_cache(
-  async (owner: string, repo: string) => _buildProjectAdminData(owner.toLowerCase(), repo.toLowerCase()),
-  ["project-admin-data"],
-  { revalidate: 300 }
+export const buildProjectAdminData = cache(
+  unstable_cache(
+    async (owner: string, repo: string) => _buildProjectAdminData(owner.toLowerCase(), repo.toLowerCase()),
+    ["project-admin-data"],
+    { revalidate: 300 }
+  )
 );

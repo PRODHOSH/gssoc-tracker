@@ -1,3 +1,5 @@
+import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { GSSOC_REPO_SET } from "@/data/gssoc-repos";
 import { supabase } from "./supabase";
 import type {
@@ -267,6 +269,7 @@ async function fetchPages(q: string, startPage: number, pages: number, order: "a
     Array.from({ length: pages }, async (_, i) => {
       const pageUrl = `https://api.github.com/search/issues?q=${encodeURIComponent(q)}&per_page=100&page=${i + startPage}&sort=created&order=${order}`;
       const r = await ghFetch(pageUrl);
+      if (r.status === 403 || r.status === 429) throw new Error("RATE_LIMITED");
       if (!r.ok) throw new Error(`API_ERROR:${r.status}`);
       const d = await r.json() as { items: RawGitHubPR[] };
       return d.items;
@@ -384,10 +387,16 @@ async function _buildPRTrackerData(username: string): Promise<PRTrackerData> {
   };
 }
 
-export async function buildPRTrackerData(username: string) {
-  const normalized = username.toLowerCase();
-  if (!USERNAME_RE.test(normalized)) {
-    throw new Error("USER_NOT_FOUND");
-  }
-  return _buildPRTrackerData(normalized);
-}
+export const buildPRTrackerData = cache(
+  unstable_cache(
+    async (username: string) => {
+      const normalized = username.toLowerCase();
+      if (!USERNAME_RE.test(normalized)) {
+        throw new Error("USER_NOT_FOUND");
+      }
+      return _buildPRTrackerData(normalized);
+    },
+    ["pr-tracker-data"],
+    { revalidate: 300 }
+  )
+);
