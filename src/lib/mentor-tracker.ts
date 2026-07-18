@@ -113,7 +113,7 @@ export async function fetchMentorPRs(rawUsername: string): Promise<RawGitHubPR[]
         }));
 
         for (let i = 0; i < payload.length; i += 100) {
-          await supabase.from("pull_requests").upsert(payload.slice(i, i + 100), { onConflict: 'id' });
+          await supabase.from("pull_requests").upsert(payload.slice(i, i + 100), { onConflict: 'id,github_login' });
         }
       }
 
