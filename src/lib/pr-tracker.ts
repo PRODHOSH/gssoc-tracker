@@ -184,12 +184,12 @@ export async function fetchGSSoCPRs(rawUsername: string): Promise<RawGitHubPR[]>
 
   // 1 minute cache for near-instant updates while preventing rate limit crashes
   if (timeSinceSync > 1 * 60 * 1000) {
-    const isFullSync = !lastSync || timeSinceSync > 24 * 60 * 60 * 1000;
+    const isFullSync = !lastSync || timeSinceSync > 6 * 60 * 60 * 1000;
     let q = baseQ;
 
     if (!isFullSync) {
-      // Subtract 10 minutes to overlap the search window, catching GitHub indexing delays
-      const overlapTime = new Date(lastSync!.getTime() - 10 * 60 * 1000);
+      // Subtract 15 minutes to overlap the search window — GitHub's search index can lag up to 15min
+      const overlapTime = new Date(lastSync!.getTime() - 15 * 60 * 1000);
       q += ` updated:>${overlapTime.toISOString()}`;
     }
 
@@ -388,15 +388,16 @@ async function _buildPRTrackerData(username: string): Promise<PRTrackerData> {
 }
 
 export const buildPRTrackerData = cache(
-  unstable_cache(
-    async (username: string) => {
-      const normalized = username.toLowerCase();
-      if (!USERNAME_RE.test(normalized)) {
-        throw new Error("USER_NOT_FOUND");
-      }
-      return _buildPRTrackerData(normalized);
-    },
-    ["pr-tracker-data-v2"],
-    { revalidate: 300 }
-  )
+  (username: string) => {
+    const normalized = username.toLowerCase();
+    if (!USERNAME_RE.test(normalized)) {
+      throw new Error("USER_NOT_FOUND");
+    }
+    // Include username in the cache key to prevent cross-user cache pollution
+    return unstable_cache(
+      () => _buildPRTrackerData(normalized),
+      ["pr-tracker-data-v2", normalized],
+      { revalidate: 300 }
+    )();
+  }
 );

@@ -73,6 +73,81 @@ export async function fetchMentorPRs(rawUsername: string): Promise<RawGitHubPR[]
     .select("last_synced_at")
     .eq("github_login", dbKey)
     .single();
+import { cache } from "react";
+import { unstable_cache } from "next/cache";
+import { supabase } from "./supabase";
+import { fetchGitHubUser } from "@/lib/pr-tracker";
+import { GSSOC_REPO_SET } from "@/data/gssoc-repos";
+import type { RawGitHubPR, GitHubUser } from "@/types/pr-tracker";
+
+const USERNAME_RE = /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?$/;
+
+export const MENTOR_LEVEL_SCORES: Record<string, number> = {
+  "level:beginner":     10,
+  "level:intermediate": 20,
+  "level:advanced":     30,
+  "level:critical":     50,
+};
+
+export const MENTOR_QUALITY_BONUS: Record<string, number> = {
+  "quality:clean":       5,
+  "quality:exceptional": 10,
+};
+
+export interface MentorPR {
+  id: number;
+  number: number;
+  title: string;
+  url: string;
+  repo: string;
+  repoUrl: string;
+  state: "merged" | "open" | "closed";
+  mergedAt: string | null;
+  createdAt: string;
+  labels: string[];
+  labelColors: Record<string, string>;
+  levelLabel: string | null;
+  levelScore: number;
+  qualityLabel: string | null;
+  qualityBonus: number;
+  points: number;
+}
+
+export interface MentorTrackerData {
+  user: GitHubUser;
+  prs: MentorPR[];
+  totalPoints: number;
+  totalPRs: number;
+  fetchedAt: string;
+}
+
+async function ghFetch(url: string) {
+  const headers: Record<string, string> = {
+    Accept: "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28",
+  };
+  const token = process.env.GH_TOKEN;
+  if (token) headers.Authorization = `Bearer ${token}`;
+  // No next.revalidate here — unstable_cache handles caching at the function level
+  return fetch(url, { headers, cache: "no-store" });
+}
+
+export async function fetchMentorPRs(rawUsername: string): Promise<RawGitHubPR[]> {
+  const username = rawUsername.toLowerCase();
+  const baseQ = `label:"mentor:${username}" type:pr`;
+
+  if (!supabase) {
+    return fetchAllFromGitHub(baseQ);
+  }
+
+  // Use a namespaced key so mentor and contributor timestamps never collide
+  const dbKey = `mentor:${username}`;
+
+  const { data: userRow } = await supabase
+    .from("users")
+    .select("last_synced_at")
+    .eq("github_login", dbKey)
+    .single();
 
   const now = new Date();
   const lastSyncStr = userRow?.last_synced_at;
@@ -81,12 +156,12 @@ export async function fetchMentorPRs(rawUsername: string): Promise<RawGitHubPR[]
 
   // 1 minute cache for near-instant updates while preventing rate limit crashes
   if (timeSinceSync > 1 * 60 * 1000) {
-    const isFullSync = !lastSync || timeSinceSync > 24 * 60 * 60 * 1000;
+    const isFullSync = !lastSync || timeSinceSync > 6 * 60 * 60 * 1000;
     let q = baseQ;
 
     if (!isFullSync) {
-      // Subtract 10 minutes to overlap the search window, catching GitHub indexing delays
-      const overlapTime = new Date(lastSync!.getTime() - 10 * 60 * 1000);
+      // Subtract 15 minutes to overlap the search window — GitHub's search index can lag up to 15min
+      const overlapTime = new Date(lastSync!.getTime() - 15 * 60 * 1000);
       q += ` updated:>${overlapTime.toISOString()}`;
     }
 
@@ -133,15 +208,30 @@ export async function fetchMentorPRs(rawUsername: string): Promise<RawGitHubPR[]
     }
   }
 
-  // Read mentor PRs from the database using the namespaced key
-  const { data: dbPRs, error } = await supabase
-    .from("pull_requests")
-    .select("raw_data")
-    .eq("github_login", dbKey);
+  // Read mentor PRs from the database using the namespaced key with pagination
+  let dbPRs: any[] = [];
+  let page = 0;
+  const pageSize = 1000;
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data, error } = await supabase
+      .from("pull_requests")
+      .select("raw_data")
+      .eq("github_login", dbKey)
+      .range(page * pageSize, (page + 1) * pageSize - 1);
+      
+    if (error) {
+      console.error("Supabase error:", error);
+      return fetchAllFromGitHub(baseQ);
+    }
     
-  if (error) {
-     console.error("Supabase error:", error);
-     return fetchAllFromGitHub(baseQ);
+    dbPRs.push(...(data || []));
+    if (!data || data.length < pageSize) {
+      hasMore = false;
+    } else {
+      page++;
+    }
   }
 
   return dbPRs.map((row: any) => row.raw_data as RawGitHubPR);
@@ -255,16 +345,24 @@ async function _buildMentorTrackerData(username: string): Promise<MentorTrackerD
   return {
     user,
     prs,
-    totalPoints: mergedPRs.reduce((s, p) => s + p.points, 0),    totalPRs: mergedPRs.length,
+    totalPoints: mergedPRs.reduce((s, p) => s + p.points, 0),
+    totalPRs: mergedPRs.length,
     fetchedAt: new Date().toISOString(),
   };
 }
 
 // Cache per username for 5 minutes — shared across all requests on the same deployment
 export const buildMentorTrackerData = cache(
-  unstable_cache(
-    _buildMentorTrackerData,
-    ["mentor-tracker-data-v2"],
-    { revalidate: 300 }
-  )
+  (username: string) => {
+    const normalized = username.toLowerCase();
+    if (!USERNAME_RE.test(normalized)) {
+      throw new Error("USER_NOT_FOUND");
+    }
+    // Include username in the cache key to prevent cross-user cache pollution
+    return unstable_cache(
+      () => _buildMentorTrackerData(normalized),
+      ["mentor-tracker-data-v2", normalized],
+      { revalidate: 300 }
+    )();
+  }
 );
