@@ -60,107 +60,92 @@ async function ghFetch(url: string) {
 export async function fetchMentorPRs(rawUsername: string): Promise<RawGitHubPR[]> {
   const username = rawUsername.toLowerCase();
   const baseQ = `label:"mentor:${username}" type:pr`;
+  const dbKey = `mentor:${username}`;
 
   if (!supabase) {
     return fetchAllFromGitHub(baseQ);
   }
 
-  // Use a namespaced key so mentor and contributor timestamps never collide
-  const dbKey = `mentor:${username}`;
+  // Fire-and-forget: record visited_at so cron targets this mentor (no await)
+  void supabase
+    .from("users")
+    .upsert({ github_login: dbKey, visited_at: new Date().toISOString() }, { onConflict: "github_login" });
 
+  // Check if this mentor has ever been synced
   const { data: userRow } = await supabase
     .from("users")
     .select("last_synced_at")
     .eq("github_login", dbKey)
     .single();
 
-  const now = new Date();
-  const lastSyncStr = userRow?.last_synced_at;
-  const lastSync = lastSyncStr ? new Date(lastSyncStr) : null;
-  const timeSinceSync = lastSync ? now.getTime() - lastSync.getTime() : Infinity;
+  const hasBeenSynced = !!userRow?.last_synced_at;
 
-  // 1 minute cache for near-instant updates while preventing rate limit crashes
-  if (timeSinceSync > 1 * 60 * 1000) {
-    const isFullSync = !lastSync || timeSinceSync > 6 * 60 * 60 * 1000;
-    let q = baseQ;
-
-    if (!isFullSync) {
-      // Subtract 15 minutes to overlap the search window — GitHub's search index can lag up to 15min
-      const overlapTime = new Date(lastSync!.getTime() - 15 * 60 * 1000);
-      q += ` updated:>${overlapTime.toISOString()}`;
-    }
-
-    // Stampede lock: set timestamp 2 min in the future to block concurrent requests.
-    // If everything fails, this lock naturally expires and the system self-heals.
-    const lockTime = new Date(now.getTime() + 2 * 60 * 1000);
-    await supabase.from("users").upsert({ github_login: dbKey, last_synced_at: lockTime.toISOString() });
-
-    try {
-      const deltaPRs = await fetchAllFromGitHub(q);
-
-      // Full baseline sync: wipe existing PRs to purge stale data (e.g. removed labels)
-      if (isFullSync) {
-        await supabase.from("pull_requests").delete().eq("github_login", dbKey);
-      }
-
-      // Upsert fetched PRs into the database
-      if (deltaPRs.length > 0) {
-        const payload = deltaPRs.map((pr) => ({
-          id: pr.id,
-          github_login: dbKey,
-          raw_data: pr,
-          updated_at: pr.updated_at
-        }));
-
-        for (let i = 0; i < payload.length; i += 100) {
-          await supabase.from("pull_requests").upsert(payload.slice(i, i + 100), { onConflict: 'id,github_login' });
-        }
-      }
-
-      // Everything succeeded: set the real timestamp
-      await supabase.from("users").update({ last_synced_at: now.toISOString() }).eq("github_login", dbKey);
-    } catch (err: any) {
-      console.warn(`[mentor-tracker] Sync failed for ${username}, falling back to DB:`, err.message);
-      // Best-effort: roll back the lock so it retries next time.
-      // If this also fails, the lock expires in 2 minutes anyway.
-      try {
-        if (lastSync) {
-          await supabase.from("users").update({ last_synced_at: lastSync.toISOString() }).eq("github_login", dbKey);
-        } else {
-          await supabase.from("users").delete().eq("github_login", dbKey);
-        }
-      } catch { /* lock will self-heal in 2 minutes */ }
-    }
+  if (!hasBeenSynced) {
+    // First-time mentor visit: sync immediately so they see their data
+    console.log(`[mentor-tracker] First visit for ${username} — doing one-time sync`);
+    await runMentorGitHubSync(username, baseQ);
   }
 
-  // Read mentor PRs from the database using the namespaced key with pagination
-  let dbPRs: any[] = [];
+  // Always serve from DB — fast, zero GitHub API calls
+  return readMentorFromDB(dbKey, baseQ);
+}
+
+/** Full GitHub → DB sync for a mentor. Called by first-visit and the cron. */
+export async function runMentorGitHubSync(username: string, baseQ?: string): Promise<void> {
+  if (!supabase) return;
+  const dbKey = `mentor:${username}`;
+  const q = baseQ ?? `label:"mentor:${username}" type:pr`;
+  const now = new Date();
+  const lockTime = new Date(now.getTime() + 3 * 60 * 1000);
+  await supabase.from("users").upsert({ github_login: dbKey, last_synced_at: lockTime.toISOString() }, { onConflict: "github_login" });
+
+  try {
+    const prs = await fetchAllFromGitHub(q);
+    await supabase.from("pull_requests").delete().eq("github_login", dbKey);
+
+    if (prs.length > 0) {
+      const payload = prs.map((pr) => ({
+        id: pr.id,
+        github_login: dbKey,
+        raw_data: pr,
+        updated_at: pr.updated_at,
+      }));
+      for (let i = 0; i < payload.length; i += 100) {
+        await supabase.from("pull_requests").upsert(payload.slice(i, i + 100), { onConflict: "id,github_login" });
+      }
+    }
+
+    await supabase.from("users").update({ last_synced_at: now.toISOString() }).eq("github_login", dbKey);
+  } catch (err: any) {
+    console.warn(`[mentor-tracker] Sync failed for ${username}:`, err.message);
+    try {
+      await supabase.from("users").update({ last_synced_at: null }).eq("github_login", dbKey);
+    } catch { /* self-heals */ }
+  }
+}
+
+async function readMentorFromDB(dbKey: string, baseQ: string): Promise<RawGitHubPR[]> {
+  if (!supabase) return [];
+  let all: any[] = [];
   let page = 0;
   const pageSize = 1000;
-  let hasMore = true;
-
-  while (hasMore) {
+  while (true) {
     const { data, error } = await supabase
       .from("pull_requests")
       .select("raw_data")
       .eq("github_login", dbKey)
       .range(page * pageSize, (page + 1) * pageSize - 1);
-      
     if (error) {
-      console.error("Supabase error:", error);
+      console.error("Supabase read error:", error);
       return fetchAllFromGitHub(baseQ);
     }
-    
-    dbPRs.push(...(data || []));
-    if (!data || data.length < pageSize) {
-      hasMore = false;
-    } else {
-      page++;
-    }
+    all.push(...(data || []));
+    if (!data || data.length < pageSize) break;
+    page++;
   }
-
-  return dbPRs.map((row: any) => row.raw_data as RawGitHubPR);
+  return all.map((r: any) => r.raw_data as RawGitHubPR);
 }
+
 
 async function fetchPages(q: string, startPage: number, pages: number, order: "asc" | "desc"): Promise<RawGitHubPR[]> {
   const rest = await Promise.all(

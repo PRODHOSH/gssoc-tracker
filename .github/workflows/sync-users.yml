@@ -1,0 +1,35 @@
+name: Sync Active Users
+
+on:
+  schedule:
+    # Every 15 minutes — keeps all active users' PR data fresh
+    - cron: '*/15 * * * *'
+  workflow_dispatch: # Manual trigger from GitHub UI for testing
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Trigger user sync
+        run: |
+          echo "Triggering sync for active users..."
+          RESPONSE=$(curl -s -o /tmp/response.json -w "%{http_code}" \
+            -X POST "https://gssoc-tracker.vercel.app/api/cron/sync-users" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            --max-time 540)
+
+          echo "HTTP Status: $RESPONSE"
+          cat /tmp/response.json
+
+          if [ "$RESPONSE" != "200" ]; then
+            echo "Sync failed with HTTP $RESPONSE"
+            exit 1
+          fi
+
+          SYNCED=$(cat /tmp/response.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('synced', 0))")
+          FAILED=$(cat /tmp/response.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('failed', 0))")
+          TOTAL=$(cat /tmp/response.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('total', 0))")
+
+          echo "✅ Synced $SYNCED/$TOTAL users ($FAILED failed)"
