@@ -6,6 +6,10 @@ on:
     - cron: '*/15 * * * *'
   workflow_dispatch: # Manual trigger from GitHub UI for testing
 
+concurrency:
+  group: sync-users
+  cancel-in-progress: false
+
 jobs:
   sync:
     runs-on: ubuntu-latest

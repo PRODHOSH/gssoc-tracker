@@ -29,12 +29,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No Supabase connection" }, { status: 500 });
   }
 
-  // Query all users who visited in the last 24 hours
+  // Query users who visited in the last 24 hours, AND haven't been synced in the last 30 minutes
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+  
   const { data: activeUsers, error } = await supabase
     .from("users")
     .select("github_login")
-    .gte("visited_at", since);
+    .gte("visited_at", since)
+    .or(`last_synced_at.lt.${thirtyMinsAgo},last_synced_at.is.null`);
 
   if (error) {
     console.error("[cron] Failed to fetch active users:", error);
