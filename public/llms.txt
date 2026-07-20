@@ -1,0 +1,65 @@
+# GSSoC PR Tracker
+
+> The unofficial community tracker for GirlScript Summer of Code (GSSoC) 2026. Track contributor PR points, mentor review scores, and validate PRs — instantly. Built by PRODHOSH.
+
+## What this site does
+
+GSSoC PR Tracker lets GSSoC 2026 participants check their contribution stats without waiting for the official leaderboard. Enter any GitHub username to see all your GSSoC-approved PRs, your total points, your rank, and a breakdown of each PR's score.
+
+Key features:
+- **Contributor Tracker** — Shows all merged PRs with `gssoc:approved` label, calculates points using the official GSSoC 2026 scoring formula
+- **Mentor Tracker** — Shows PRs reviewed by a mentor (`mentor:<username>` label), calculates mentor score
+- **PR Validator** — Paste any GitHub PR link to instantly check if it qualifies for GSSoC 2026 points and see the exact breakdown
+- **Email Alerts** — Subscribe to get notified when your score or rank changes
+
+## Scoring formula
+
+Contributor points per merged PR:
+- Base: 50 points
+- Difficulty: beginner=20, intermediate=35, advanced=55, critical=80
+- Quality multiplier: clean=1.2×, exceptional=1.5×
+- Type bonus: docs=+5, bug/feature/testing/design/refactor=+10, accessibility/performance/devops=+15, security=+20
+
+Mentor points per reviewed merged PR:
+- Difficulty: beginner=10, intermediate=20, advanced=30, critical=50
+- Quality bonus: clean=+5, exceptional=+10
+
+PRs tagged `gssoc:invalid`, `gssoc:spam`, or `gssoc:ai-slop` score 0 points.
+
+Only PRs in the 421 officially registered GSSoC 2026 repositories count. PRs in unofficial repos are shown but marked as Disqualified (0 points).
+
+## Technical architecture
+
+- **Framework**: Next.js 16 (App Router, server components)
+- **Database**: Supabase (Postgres) — caches PR data so pages load instantly
+- **Sync**: Browser-triggered background sync via `/api/sync-data` — data is fetched from GitHub API server-side and cached in Supabase. Pages load from DB instantly. Sync runs in background after page load (30-minute throttle).
+- **Hosting**: Vercel
+- **Analytics**: Vercel Analytics, PostHog (anonymous), Google Analytics
+
+## Data and privacy
+
+- No accounts or sign-up required
+- Only public GitHub data is accessed (PR titles, labels, merge status)
+- No private repo access
+- Email alerts are optional; stored in a plain file in the GitHub repo
+- Session replays via PostHog are anonymous (no PII)
+
+## Important disclaimers
+
+- This is an **unofficial** community tool — not affiliated with GirlScript Summer of Code or GirlScript Foundation
+- Scores here align with the official formula but the official leaderboard is the authoritative source for rankings
+- The Project Admin tracker (https://gssoc-tracker-chi.vercel.app) is a separate deployment built by @Ixotic27
+
+## Links
+
+- Main tracker: https://gssoc-tracker.vercel.app
+- PR Validator: https://gssoc-tracker.vercel.app/pr-check
+- Terms & Privacy: https://gssoc-tracker.vercel.app/terms
+- Source code: https://github.com/PRODHOSH/gssoc-tracker
+- Project Admin tracker: https://gssoc-tracker-chi.vercel.app
+
+## Built by
+
+Prodhosh V.S — GSSoC 2026 Ambassador + Contributor, VIT Chennai
+GitHub: https://github.com/PRODHOSH
+LinkedIn: https://www.linkedin.com/in/prodhoshvs
