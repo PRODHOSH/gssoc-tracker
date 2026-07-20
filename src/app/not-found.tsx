@@ -1,11 +1,7 @@
+"use client";
+
 import Link from "next/link";
 import { GitPullRequest, Home, Search, AlertCircle } from "lucide-react";
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "404 — Page Not Found | GSSoC PR Tracker",
-  description: "The page you're looking for doesn't exist. Head back to the GSSoC PR Tracker.",
-};
 
 export default function NotFound() {
   return (
