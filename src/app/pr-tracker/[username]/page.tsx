@@ -88,7 +88,7 @@ export default async function PRTrackerDashboard({ params }: Props) {
 
   return (
     <div style={{ minHeight: "100vh", background: ds.canvasSoft, fontFamily: "var(--font-sans)" }}>
-      <BackgroundSync username={decoded} isEmpty={isEmpty} />
+      <BackgroundSync username={decoded} />
       <NpsFeedback />
       <StarNudge username={decoded} />
       {/* ── Sticky nav ── */}

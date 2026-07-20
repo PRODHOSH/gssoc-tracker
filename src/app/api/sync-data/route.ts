@@ -10,6 +10,7 @@
  * Stampede lock: DB timestamp blocks concurrent syncs for same user.
  */
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { supabase } from "@/lib/supabase";
 import { runGitHubSync } from "@/lib/pr-tracker";
 import { runMentorGitHubSync } from "@/lib/mentor-tracker";
@@ -64,11 +65,15 @@ export async function GET(req: NextRequest) {
       await runGitHubSync(username, baseQ, null);
     }
 
-    // Also update visited_at so we know this user is active
+    // Bust the Next.js cache so router.refresh() gets fresh data
+    const pagePath = isMentor ? `/mentor/${username}` : `/pr-tracker/${username}`;
+    revalidatePath(pagePath);
+
+    // Also update visited_at
     void supabase
       .from("users")
       .update({ visited_at: new Date().toISOString() })
-      .eq("github_login", dbKey);
+      .eq("github_login", isMentor ? `mentor:${username}` : username);
 
     return NextResponse.json({ synced: true });
   } catch (err: any) {

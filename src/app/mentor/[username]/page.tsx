@@ -88,7 +88,7 @@ export default async function MentorTrackerPage({ params }: Props) {
 
   return (
     <div style={{ minHeight: "100vh", background: ds.canvasSoft, fontFamily: "var(--font-sans)" }}>
-      <BackgroundSync username={decoded} isMentor isEmpty={isEmpty} />
+      <BackgroundSync username={decoded} isMentor />
       <NpsFeedback />
       <StarNudge username={decoded} />
       {/* ── Sticky nav ── */}
