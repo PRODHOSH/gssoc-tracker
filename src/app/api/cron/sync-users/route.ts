@@ -41,40 +41,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const users = activeUsers ?? [];
-  console.log(`[cron] Syncing ${users.length} active users`);
+  const users = (activeUsers ?? []).map((u) => u.github_login);
+  console.log(`[cron] Found ${users.length} active users to sync`);
 
-  const results: { user: string; status: "ok" | "error"; error?: string }[] = [];
-
-  for (const { github_login } of users) {
-    const isMentor = github_login.startsWith("mentor:");
-    const username = isMentor ? github_login.slice(7) : github_login;
-
-    try {
-      if (isMentor) {
-        await runMentorGitHubSync(username);
-      } else {
-        const baseQ = `type:pr author:${username} label:"gssoc:approved"`;
-        await runGitHubSync(username, baseQ, null);
-      }
-      results.push({ user: github_login, status: "ok" });
-      console.log(`[cron] ✓ ${github_login}`);
-    } catch (err: any) {
-      results.push({ user: github_login, status: "error", error: err.message });
-      console.warn(`[cron] ✗ ${github_login}:`, err.message);
-    }
-
-    // Pace: wait 2 seconds between each user
-    await sleep(PACE_MS);
-  }
-
-  const ok = results.filter((r) => r.status === "ok").length;
-  const failed = results.filter((r) => r.status === "error").length;
-
-  return NextResponse.json({
-    synced: ok,
-    failed,
-    total: users.length,
-    results,
-  });
+  return NextResponse.json({ users });
 }
