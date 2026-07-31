@@ -1450,5 +1450,23 @@
       "score_before": 4761,
       "score_after": 4761
     }
+  },
+  {
+    "timestamp": "2026-07-31T05:50:15.881Z",
+    "type": "change_alert",
+    "subject": "GSSoC Alert: Score +0 pts · Rank #809",
+    "email_sent": true,
+    "changes": {
+      "rank_before": 808,
+      "rank_after": 809,
+      "score_before": 4761,
+      "score_after": 4761
+    }
+  },
+  {
+    "timestamp": "2026-07-31T05:50:16.672Z",
+    "type": "daily_digest",
+    "subject": "GSSoC Daily: Score 4,761 pts · Rank #809",
+    "email_sent": true
   }
 ]
