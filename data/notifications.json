@@ -2014,5 +2014,17 @@
       "score_before": 4796,
       "score_after": 4796
     }
+  },
+  {
+    "timestamp": "2026-08-11T00:48:04.243Z",
+    "type": "change_alert",
+    "subject": "GSSoC Alert: Score +0 pts · Rank #851",
+    "email_sent": true,
+    "changes": {
+      "rank_before": 850,
+      "rank_after": 851,
+      "score_before": 4796,
+      "score_after": 4796
+    }
   }
 ]
