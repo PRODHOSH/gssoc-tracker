@@ -2056,5 +2056,11 @@
       "score_before": 4796,
       "score_after": 4796
     }
+  },
+  {
+    "timestamp": "2026-08-12T04:22:25.994Z",
+    "type": "daily_digest",
+    "subject": "GSSoC Daily: Score 4,796 pts · Rank #853",
+    "email_sent": true
   }
 ]
