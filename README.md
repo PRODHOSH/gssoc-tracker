@@ -29,7 +29,7 @@ That is why I put it out for the community. It is not trying to replace the offi
 ## Architecture
 <img width="2460" height="1962" alt="image" src="https://github.com/user-attachments/assets/0b7fa982-b759-4ed2-a97c-c9d4a1684ed0" />
 
---
+---
 
 ## What it does
 
