@@ -44,4 +44,7 @@ next-env.d.ts
 
 .vercel
 supabase_schema.sql
-config.bat
+
+# env files
+.env*
+!.env.example
